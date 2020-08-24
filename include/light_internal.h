@@ -25,22 +25,14 @@
 #define INCLUDE_LIGHT_INTERNAL_H_
 
 #include "light_types.h"
-#include "light_platform.h"
 
+#include <stddef.h>
 #include <stdint.h>
-
-struct _light_pcapng_stream {
-	union {
-		__fd_t fd;
-		void *reserved;
-	} stream;
-	struct _light_pcapng *current_block;
-	int valid;
-};
+#include <assert.h>
 
 struct _light_pcapng {
 	uint32_t block_type;
-	uint32_t block_total_lenght;
+	uint32_t block_total_length;
 	uint32_t *block_body;
 	struct _light_option *options;
 	struct _light_pcapng *next_block;

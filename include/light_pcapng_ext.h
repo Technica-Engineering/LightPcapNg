@@ -34,6 +34,7 @@ extern "C" {
 #include <stdint.h>
 #ifdef _MSC_VER
 #include <Winsock2.h>
+#include <time.h>
 #else
 #include <sys/time.h>
 #endif
@@ -49,7 +50,7 @@ typedef struct _light_pcapng_t light_pcapng_t;
 
 typedef struct _light_packet_header {
 	uint32_t interface_id;
-	struct timeval timestamp;
+	struct timespec timestamp;
 	uint32_t captured_length;
 	uint32_t original_length;
 	uint16_t data_link;
@@ -77,7 +78,8 @@ typedef struct _light_pcapng_file_info {
 
 light_pcapng_t *light_pcapng_open_read(const char* file_path, light_boolean read_all_interfaces);
 
-light_pcapng_t *light_pcapng_open_write(const char* file_path, light_pcapng_file_info *file_info);
+//Set compression level to 0 to disable compression!
+light_pcapng_t *light_pcapng_open_write(const char* file_path, light_pcapng_file_info *file_info, int compression_level);
 
 light_pcapng_t *light_pcapng_open_append(const char* file_path);
 
@@ -94,6 +96,8 @@ int light_get_next_packet(light_pcapng_t *pcapng, light_packet_header *packet_he
 void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packet_header, const uint8_t *packet_data);
 
 void light_pcapng_close(light_pcapng_t *pcapng);
+
+void light_pcapng_flush(light_pcapng_t *pcapng);
 
 #ifdef __cplusplus
 }
