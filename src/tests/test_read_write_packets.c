@@ -49,7 +49,7 @@ int main(int argc, const char **args) {
 
 	for (i = 1; i < argc; ++i) {
 		const char *file = args[i];
-		light_pcapng_t *pcapng_read = light_pcapng_open_read(file, LIGHT_FALSE);
+		light_pcapng_t *pcapng_read = light_pcapng_open_read(file, false);
 		if (pcapng_read != NULL) {
 			const char* file_append = "output_append.pcapng";
 			copy_file(file, file_append);

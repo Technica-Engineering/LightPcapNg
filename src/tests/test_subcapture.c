@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static light_boolean subcapture_predicate(const light_pcapng pcapng)
+static bool subcapture_predicate(const light_pcapng pcapng)
 {
 	uint32_t type = LIGHT_UNKNOWN_DATA_BLOCK;
 	uint32_t length = 0;
@@ -60,7 +60,7 @@ int main(int argc, const char **args) {
 				file_name = offset + 1;
 
 			light_subcapture(pcapng, subcapture_predicate, &subcapture);
-			light_add_option(subcapture, subcapture, option, LIGHT_TRUE);
+			light_add_option(subcapture, subcapture, option, true);
 			subcapture_mem = light_pcapng_to_memory(subcapture, &subcapture_size);
 
 			sprintf(subcapture_name, "subcapture_%s", file_name);

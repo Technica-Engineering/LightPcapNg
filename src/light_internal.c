@@ -51,7 +51,7 @@ struct _light_option *__copy_option(const struct _light_option *option)
 	return copy;
 }
 
-struct _light_pcapng *__copy_block(const struct _light_pcapng *pcapng, const light_boolean recursive)
+struct _light_pcapng *__copy_block(const struct _light_pcapng *pcapng, const bool recursive)
 {
 	if (pcapng == NULL) {
 		return NULL;
@@ -70,7 +70,7 @@ struct _light_pcapng *__copy_block(const struct _light_pcapng *pcapng, const lig
 	pcopy->block_body = calloc(body_length, 1);
 	memcpy(pcopy->block_body, pcapng->block_body, body_length);
 
-	if (recursive == LIGHT_TRUE) {
+	if (recursive == true) {
 		pcopy->next_block = __copy_block(pcapng->next_block, recursive);
 	}
 	else {
@@ -121,23 +121,23 @@ uint32_t *__get_option_size(const struct _light_option *option, size_t *size)
 	return current_mem;
 }
 
-light_boolean __is_section_header(const struct _light_pcapng * section)
+bool __is_section_header(const struct _light_pcapng * section)
 {
 	if (section != NULL) {
 		if (section->block_type != LIGHT_SECTION_HEADER_BLOCK) {
-			return LIGHT_FALSE;
+			return false;
 		}
 		else {
-			return LIGHT_TRUE;
+			return true;
 		}
 	}
 
-	return LIGHT_FALSE;
+	return false;
 }
 
 int __validate_section(struct _light_pcapng *section)
 {
-	if (__is_section_header(section) != LIGHT_TRUE) {
+	if (__is_section_header(section) != true) {
 		return LIGHT_INVALID_SECTION;
 	}
 
@@ -146,7 +146,7 @@ int __validate_section(struct _light_pcapng *section)
 	struct _light_pcapng *next_block = section->next_block;
 
 	while (next_block != NULL) {
-		if (__is_section_header(next_block) == LIGHT_TRUE) {
+		if (__is_section_header(next_block) == true) {
 			shb->section_length = size;
 			return __validate_section(next_block);
 		}

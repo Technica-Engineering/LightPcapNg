@@ -104,11 +104,11 @@ uint16_t light_get_option_length(const light_option option);
 
 // Manipulation Functions
 light_option light_create_option(const uint16_t option_code, const uint16_t option_length, void *option_value);
-int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, light_boolean copy);
+int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, bool copy);
 int light_update_option(light_pcapng section, light_pcapng pcapng, light_option option);
 int light_add_block(light_pcapng block, light_pcapng next_block);
-int light_subcapture(const light_pcapng section, light_boolean (*predicate)(const light_pcapng), light_pcapng *subcapture);
-int light_iterate(const light_pcapng pcapng, light_boolean (*stop_fn)(const light_pcapng, void *), void *args);
+int light_subcapture(const light_pcapng section, bool (*predicate)(const light_pcapng), light_pcapng *subcapture);
+int light_iterate(const light_pcapng pcapng, bool (*stop_fn)(const light_pcapng, void *), void *args);
 int light_ip_flow(light_pcapng *sectionp, light_pcapng **flows, size_t *flow_count, size_t *dropped);
 
 // Allocation and free functions

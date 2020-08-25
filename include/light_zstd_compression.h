@@ -31,8 +31,8 @@
 
 //An ethernet packet should only ever be up to 1500 bytes + some header crap
 //We also expect some ovehead for the pcapng blocks which contain the ethernet packets
-//so allocate 1700 bytes as the max input size we expect in a single shot
-#define COMPRESSION_BUFFER_IN_MAX_SIZE 1700
+//so allocate 2048 bytes as the max input size we expect in a single shot
+#define COMPRESSION_BUFFER_IN_MAX_SIZE 2048
 
 //This is the z-std compression type I would call it z-std type and realias 
 //2x but complier won't let me do that across bounds it seems

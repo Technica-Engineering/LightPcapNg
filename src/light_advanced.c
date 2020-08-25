@@ -31,7 +31,7 @@ int light_section_feature_extraction(const light_pcapng section, int (*extractor
 {
 	light_pcapng iterator;
 
-	if (__is_section_header(section) != LIGHT_TRUE) {
+	if (__is_section_header(section) != true) {
 		return LIGHT_INVALID_SECTION;
 	}
 
@@ -59,7 +59,7 @@ int light_section_feature_extraction(const light_pcapng section, int (*extractor
 
 	extractor(section, *feature_vector, feature_vector_size);
 	iterator = section->next_block;
-	while (iterator != NULL && __is_section_header(iterator) != LIGHT_TRUE) {
+	while (iterator != NULL && __is_section_header(iterator) != true) {
 		extractor(iterator, *feature_vector, feature_vector_size);
 		iterator = iterator->next_block;
 	}

@@ -164,12 +164,9 @@ static void __append_interface_block_to_file_info(const light_pcapng interface_b
 	info->link_types[info->interface_block_count++] = interface_desc_block->link_type;
 }
 
-static light_boolean __is_open_for_write(const struct _light_pcapng_t* pcapng)
+static bool __is_open_for_write(const struct _light_pcapng_t* pcapng)
 {
-	if (pcapng->file != NULL)
-		return LIGHT_TRUE;
-
-	return LIGHT_FALSE;
+	return pcapng->file != NULL;
 }
 
 // if timestamp of the packet contains number of seconds, which exceeds a limit, with which it will be possible to
@@ -177,7 +174,7 @@ static light_boolean __is_open_for_write(const struct _light_pcapng_t* pcapng)
 // such timestamps (> 18446744073) refer to year (> 2554), so we can allow ourselves not to support them for now
 static const uint64_t MAXIMUM_PACKET_SECONDS_VALUE = UINT64_MAX / 1000000000;
 
-light_pcapng_t *light_pcapng_open_read(const char* file_path, light_boolean read_all_interfaces)
+light_pcapng_t *light_pcapng_open_read(const char* file_path, bool read_all_interfaces)
 {
 	DCHECK_NULLP(file_path, return NULL);
 
@@ -244,25 +241,25 @@ light_pcapng_t *light_pcapng_open_write(const char* file_path, light_pcapng_file
 	if (file_info->file_comment_size > 0)
 	{
 		light_option new_opt = light_create_option(LIGHT_OPTION_COMMENT, file_info->file_comment_size, file_info->file_comment);
-		light_add_option(blocks_to_write, blocks_to_write, new_opt, LIGHT_FALSE);
+		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->hardware_desc_size > 0)
 	{
 		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_HARDWARE, file_info->hardware_desc_size, file_info->hardware_desc);
-		light_add_option(blocks_to_write, blocks_to_write, new_opt, LIGHT_FALSE);
+		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->os_desc_size > 0)
 	{
 		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_OS, file_info->os_desc_size, file_info->os_desc);
-		light_add_option(blocks_to_write, blocks_to_write, new_opt, LIGHT_FALSE);
+		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->user_app_desc_size > 0)
 	{
 		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_USERAPPL, file_info->user_app_desc_size, file_info->user_app_desc);
-		light_add_option(blocks_to_write, blocks_to_write, new_opt, LIGHT_FALSE);
+		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	light_pcapng next_block = blocks_to_write;
@@ -291,7 +288,7 @@ light_pcapng_t *light_pcapng_open_append(const char* file_path)
 {
 	DCHECK_NULLP(file_path, return NULL);
 
-	light_pcapng_t *pcapng = light_pcapng_open_read(file_path, LIGHT_TRUE);
+	light_pcapng_t *pcapng = light_pcapng_open_read(file_path, true);
 	DCHECK_NULLP(pcapng, return NULL);	
 
 	pcapng->file = light_open(file_path, LIGHT_OAPPEND);
@@ -483,7 +480,7 @@ void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packe
 	DCHECK_NULLP(pcapng, return);
 	DCHECK_NULLP(packet_header, return);
 	DCHECK_NULLP(packet_data, return);
-	DCHECK_ASSERT_EXP(__is_open_for_write(pcapng) == LIGHT_TRUE, "file not open for writing", return);
+	DCHECK_ASSERT_EXP(__is_open_for_write(pcapng) == true, "file not open for writing", return);
 
 	size_t iface_id = 0;
 	for (iface_id = 0; iface_id < pcapng->file_info->interface_block_count; iface_id++)
@@ -509,7 +506,7 @@ void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packe
 		// let all written packets has a timestamp resolution in nsec - this way we will not loose the precision;
 		// when a possibility to write interface blocks is added, the precision should be taken from them
 		light_option resolution_option = light_create_option(LIGHT_OPTION_IF_TSRESOL, sizeof(NSEC_PRECISION), (uint8_t*)&NSEC_PRECISION);
-		light_add_option(NULL, iface_block_pcapng, resolution_option, LIGHT_FALSE);
+		light_add_option(NULL, iface_block_pcapng, resolution_option, false);
 
 		blocks_to_write = iface_block_pcapng;
 		__append_interface_block_to_file_info(iface_block_pcapng, pcapng->file_info);
@@ -544,17 +541,17 @@ void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packe
 	if (packet_header->comment_length > 0)
 	{
 		light_option comment_opt = light_create_option(LIGHT_OPTION_COMMENT, packet_header->comment_length, packet_header->comment);
-		light_add_option(NULL, packet_block_pcapng, comment_opt, LIGHT_FALSE);
+		light_add_option(NULL, packet_block_pcapng, comment_opt, false);
 	}
 	if (packet_header->flags > 0)
 	{
 		light_option flags_opt = light_create_option(LIGHT_OPTION_EPB_FLAGS, 8, &packet_header->flags);
-		light_add_option(NULL, packet_block_pcapng, flags_opt, LIGHT_FALSE);
+		light_add_option(NULL, packet_block_pcapng, flags_opt, false);
 	}
 	if (packet_header->dropcount > 0)
 	{
 		light_option dropcount_opt = light_create_option(LIGHT_OPTION_EPB_DROPCOUNT, 8, &packet_header->dropcount);
-		light_add_option(NULL, packet_block_pcapng, dropcount_opt, LIGHT_FALSE);
+		light_add_option(NULL, packet_block_pcapng, dropcount_opt, false);
 	}
 
 	if (blocks_to_write == NULL)

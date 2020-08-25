@@ -31,7 +31,7 @@ int main(int argc, const char **args) {
 
 	for (i = 1; i < argc; ++i) {
 		const char *file = args[i];
-		light_pcapng_t *pcapng = light_pcapng_open_read(file, LIGHT_FALSE);
+		light_pcapng_t *pcapng = light_pcapng_open_read(file, false);
 		if (pcapng != NULL) {
 			light_pcapng_file_info *info = light_pcang_get_file_info(pcapng);
 			printf("file version is %d.%d\n", info->major_version, info->minor_version);

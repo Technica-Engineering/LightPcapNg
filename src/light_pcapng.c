@@ -587,13 +587,13 @@ size_t light_get_size(const light_pcapng pcapng)
    return size;
 }
 
-int light_iterate(const light_pcapng pcapng, light_boolean (*stop_fn)(const light_pcapng, void *), void *args)
+int light_iterate(const light_pcapng pcapng, bool (*stop_fn)(const light_pcapng, void *), void *args)
 {
    int iterations = 0;
    light_pcapng iterator = pcapng;
 
    while (iterator != NULL) {
-      if (stop_fn(iterator, args) == LIGHT_FALSE) {
+      if (stop_fn(iterator, args) == false) {
          break;
       }
       iterations++;

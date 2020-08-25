@@ -1,6 +1,8 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.17)
+
 project (light_pcapng C)
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${CMAKE_CURRENT_SOURCE_DIR}/include/ -Wall -O2 -fPIC -DUNIVERSAL -g")
+
+include_directories("include")
 
 file(GLOB LIGHT_SOURCES src/*.c)
 

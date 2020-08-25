@@ -46,7 +46,7 @@ light_option light_create_option(const uint16_t option_code, const uint16_t opti
 	return option;
 }
 
-int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, light_boolean copy)
+int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, bool copy)
 {
 	size_t option_size = 0;
 	light_option option_list = NULL;
@@ -55,7 +55,7 @@ int light_add_option(light_pcapng section, light_pcapng pcapng, light_option opt
 		return LIGHT_INVALID_ARGUMENT;
 	}
 
-	if (copy == LIGHT_TRUE) {
+	if (copy == true) {
 		option_list = __copy_option(option);
 	}
 	else {
@@ -114,7 +114,7 @@ int light_update_option(light_pcapng section, light_pcapng pcapng, light_option 
 	}
 
 	if (iterator == NULL) {
-		return light_add_option(section, pcapng, option, LIGHT_TRUE);
+		return light_add_option(section, pcapng, option, true);
 	}
 
 	if (iterator->option_length != option->option_length) {
@@ -148,7 +148,7 @@ int light_add_block(light_pcapng block, light_pcapng next_block)
 	return LIGHT_SUCCESS;
 }
 
-int light_subcapture(const light_pcapng section, light_boolean (*predicate)(const light_pcapng), light_pcapng *subcapture)
+int light_subcapture(const light_pcapng section, bool (*predicate)(const light_pcapng), light_pcapng *subcapture)
 {
 	if (__is_section_header(section) == 0) {
 		PCAPNG_ERROR("Invalid section header");
@@ -156,14 +156,14 @@ int light_subcapture(const light_pcapng section, light_boolean (*predicate)(cons
 	}
 
 	// Root section header is automatically included into the subcapture.
-	light_pcapng root = __copy_block(section, LIGHT_FALSE);
+	light_pcapng root = __copy_block(section, false);
 	light_pcapng iterator = root;
 	light_pcapng next_block = section->next_block;
 
 	while (next_block != NULL) {
 		// Predicate functions applies to all block types, including section header blocks.
-		if (!!predicate(next_block) == LIGHT_TRUE) {
-			iterator->next_block = __copy_block(next_block, LIGHT_FALSE);
+		if (!!predicate(next_block) == true) {
+			iterator->next_block = __copy_block(next_block, false);
 			iterator = iterator->next_block;
 		}
 		next_block = next_block->next_block;

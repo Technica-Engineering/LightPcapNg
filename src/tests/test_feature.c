@@ -38,7 +38,7 @@ enum feature_description {
 	FEATURE_LENGTH = 1,
 };
 
-static void print_interface(const struct _light_interface_description_block *idb)
+static void print_interface(const struct _light_interface_description_block* idb)
 {
 	printf("Interface link type = 0x%X\n", idb->link_type);
 	printf("Interface snapshot length = %u\n", idb->snapshot_length);
