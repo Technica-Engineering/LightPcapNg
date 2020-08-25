@@ -213,25 +213,25 @@ light_pcapng_t* light_pcapng_open_write(const char* file_path, light_pcapng_file
 
 	if (file_info->file_comment)
 	{
-		light_option new_opt = light_create_option(LIGHT_OPTION_COMMENT, file_info->file_comment, strlen(file_info->file_comment));
+		light_option new_opt = light_create_option(LIGHT_OPTION_COMMENT, strlen(file_info->file_comment), file_info->file_comment);
 		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->hardware_desc)
 	{
-		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_HARDWARE, file_info->hardware_desc, strlen(file_info->hardware_desc));
+		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_HARDWARE, strlen(file_info->hardware_desc), file_info->hardware_desc);
 		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->os_desc)
 	{
-		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_OS, file_info->os_desc, strlen(file_info->os_desc));
+		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_OS, strlen(file_info->os_desc), file_info->os_desc);
 		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
 	if (file_info->user_app_desc)
 	{
-		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_USERAPP, file_info->user_app_desc, strlen(file_info->user_app_desc));
+		light_option new_opt = light_create_option(LIGHT_OPTION_SHB_USERAPP, strlen(file_info->user_app_desc), file_info->user_app_desc);
 		light_add_option(blocks_to_write, blocks_to_write, new_opt, false);
 	}
 
@@ -400,13 +400,13 @@ int light_get_next_packet(light_pcapng_t* pcapng, light_packet_interface* lif, l
 		light_option flags_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_FLAGS);
 		if (flags_opt != NULL)
 		{
-			packet_header->flags = (uint32_t*)light_get_option_data(flags_opt);
+			packet_header->flags = *(uint32_t*)light_get_option_data(flags_opt);
 		}
 
 		light_option dropcount_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_DROPCOUNT);
 		if (dropcount_opt != NULL)
 		{
-			packet_header->dropcount = (uint64_t*)light_get_option_data(dropcount_opt);
+			packet_header->dropcount = *(uint64_t*)light_get_option_data(dropcount_opt);
 		}
 
 		*packet_data = (uint8_t*)epb->packet_data;
@@ -497,7 +497,7 @@ void light_write_packet(light_pcapng_t* pcapng, const light_packet_interface* li
 
 	if (packet_header->comment)
 	{
-		light_option comment_opt = light_create_option(LIGHT_OPTION_COMMENT, packet_header->comment, strlen(packet_header->comment));
+		light_option comment_opt = light_create_option(LIGHT_OPTION_COMMENT, strlen(packet_header->comment), packet_header->comment);
 		light_add_option(NULL, packet_block_pcapng, comment_opt, false);
 	}
 	if (packet_header->flags > 0)
