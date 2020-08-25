@@ -38,7 +38,7 @@ light_file light_open(const char *file_name, const __read_mode_t mode);
 light_file light_open_compression(const char *file_name, const __read_mode_t mode, int compression_level);
 size_t light_read(light_file fd, void *buf, size_t count);
 size_t light_write(light_file fd, const void *buf, size_t count);
-size_t light_size(light_file fd);
+long light_size(light_file fd);
 int light_close(light_file fd);
 
 #endif /* INCLUDE_LIGHT_PLATFORM_H_ */

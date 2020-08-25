@@ -85,38 +85,37 @@ int main(int argc, const char **args) {
 			int index = 1;
 
 			while (1) {
+				light_packet_interface pkt_interface;
 				light_packet_header pkt_header;
 				const uint8_t *pkt_data = NULL;
 				int res = 0;
 
-				res = light_get_next_packet(pcapng_read, &pkt_header, &pkt_data);
+				res = light_get_next_packet(pcapng_read, &pkt_interface, &pkt_header, &pkt_data);
 				if (!res)
 					break;
 
 				if (pkt_data != NULL) {
-					printf("packet #%d: orig_len=%d, cap_len=%d, iface_id=%d, data_link=%d, timestamp=%d.%06d\n",
-							index,
-							pkt_header.original_length,
-							pkt_header.captured_length,
-							pkt_header.interface_id,
-							pkt_header.data_link,
-							(int)pkt_header.timestamp.tv_sec,
-							(int)pkt_header.timestamp.tv_nsec);
+					printf("packet #%d: orig_len=%d, cap_len=%d, iface=%s, data_link=%d, timestamp=%d.%06d\n",
+						index,
+						pkt_header.original_length,
+						pkt_header.captured_length,
+						pkt_interface.name,
+						pkt_interface.link_type,
+						(int)pkt_header.timestamp.tv_sec,
+						(int)pkt_header.timestamp.tv_nsec);
 
-					uint16_t comment_len = 15;
-					char comment[15];
+					char comment[16];
 					sprintf(comment, "Packet #%d", index);
 					pkt_header.comment = comment;
-					pkt_header.comment_length = comment_len;
 
-					light_write_packet(pcapng_write, &pkt_header, pkt_data);
-					light_write_packet(pcapng_append, &pkt_header, pkt_data);
+					light_write_packet(pcapng_write, &pkt_interface, &pkt_header, pkt_data);
+					light_write_packet(pcapng_append, &pkt_interface, &pkt_header, pkt_data);
 
 					index++;
 				}
 			}
 
-			printf("interface count in file: %d\n", info->interfaces_count);
+			printf("interface count in file: %zu\n", info->interfaces_count);
 
 			light_pcapng_close(pcapng_read);
 			light_pcapng_close(pcapng_write);

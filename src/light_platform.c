@@ -160,10 +160,10 @@ size_t light_write(light_file fd, const void* buf, size_t count)
 	}
 }
 
-size_t light_size(light_file fd)
+long light_size(light_file fd)
 {
-	size_t size = 0;
-	size_t current = ftell(fd->file);
+	long size = 0;
+	long current = ftell(fd->file);
 
 	fseek(fd->file, 0, SEEK_END);
 	size = ftell(fd->file);

@@ -26,14 +26,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, const char **args) {
+int main(int argc, const char** args) {
 	int i;
 
 	for (i = 1; i < argc; ++i) {
-		const char *file = args[i];
-		light_pcapng_t *pcapng = light_pcapng_open_read(file, false);
+		const char* file = args[i];
+		light_pcapng_t* pcapng = light_pcapng_open_read(file, false);
 		if (pcapng != NULL) {
-			light_pcapng_file_info *info = light_pcang_get_file_info(pcapng);
+			light_pcapng_file_info* info = light_pcang_get_file_info(pcapng);
 			printf("file version is %d.%d\n", info->major_version, info->minor_version);
 			if (info->file_comment != NULL)
 				printf("file comment is: %s\n", info->file_comment);
@@ -47,33 +47,34 @@ int main(int argc, const char **args) {
 			int index = 1;
 
 			while (1) {
+				light_packet_interface pkt_interface;
 				light_packet_header pkt_header;
-				const uint8_t *pkt_data = NULL;
+				const uint8_t* pkt_data = NULL;
 				int res = 0;
 
-				res = light_get_next_packet(pcapng, &pkt_header, &pkt_data);
+				res = light_get_next_packet(pcapng, &pkt_interface, &pkt_header, &pkt_data);
 				if (!res)
 					break;
 
 				if (pkt_data != NULL) {
-					printf("packet #%d: orig_len=%d, cap_len=%d, iface_id=%d, data_link=%d, timestamp=%d.%06d",
-							index,
-							pkt_header.original_length,
-							pkt_header.captured_length,
-							pkt_header.interface_id,
-							pkt_header.data_link,
-							(int)pkt_header.timestamp.tv_sec,
-							(int)pkt_header.timestamp.tv_nsec);
-					if (pkt_header.comment_length > 0)
-						printf(", comment=\"%s\"\n", pkt_header.comment);
-					else
-						printf("\n");
+					printf("packet #%d: orig_len=%d, cap_len=%d, iface=%s, data_link=%d, timestamp=%d.%06d",
+						index,
+						pkt_header.original_length,
+						pkt_header.captured_length,
+						pkt_interface.name,
+						pkt_interface.link_type,
+						(int)pkt_header.timestamp.tv_sec,
+						(int)pkt_header.timestamp.tv_nsec);
+					if (pkt_header.comment)
+						printf(", comment=\"%s\"", pkt_header.comment);
+
+					printf("\n");
 
 					index++;
 				}
 			}
 
-			printf("interface count in file: %d\n", info->interfaces_count);
+			printf("interface count in file: %zu\n", info->interfaces_count);
 
 			light_pcapng_close(pcapng);
 		}

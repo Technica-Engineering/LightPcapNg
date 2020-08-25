@@ -33,8 +33,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#ifdef _MSC_VER
-#include <Winsock2.h>
+#ifdef _WIN32  
 #include <time.h>
 #else
 #include <sys/time.h>
@@ -46,41 +45,34 @@ struct _light_pcapng_t;
 typedef struct _light_pcapng_t light_pcapng_t;
 
 typedef struct _light_packet_header {
-	uint32_t interface_id;
 	struct timespec timestamp;
 	uint32_t captured_length;
 	uint32_t original_length;
-	uint16_t data_link;
 	char* comment;
-	uint16_t comment_length;
 	uint32_t flags;
 	uint64_t dropcount;
 } light_packet_header;
 
 typedef struct _light_interface {
 	uint16_t link_type;
+	char* name;
+	char* description;
 	double timestamp_resolution;
-} light_interface;
+
+} light_packet_interface;
 
 typedef struct _light_pcapng_file_info {
 	uint16_t major_version;
 	uint16_t minor_version;
 
 	char *file_comment;
-	size_t file_comment_size;
-
 	char *hardware_desc;
-	size_t hardware_desc_size;
-
 	char *os_desc;
-	size_t os_desc_size;
 
 	char *user_app_desc;
-	size_t user_app_desc_size;
 	
-	light_interface interfaces[MAX_SUPPORTED_INTERFACE_BLOCKS];
+	light_packet_interface interfaces[MAX_SUPPORTED_INTERFACE_BLOCKS];
 	size_t interfaces_count;
-
 } light_pcapng_file_info;
 
 
@@ -99,9 +91,9 @@ void light_free_file_info(light_pcapng_file_info *info);
 
 light_pcapng_file_info *light_pcang_get_file_info(light_pcapng_t *pcapng);
 
-int light_get_next_packet(light_pcapng_t *pcapng, light_packet_header *packet_header, const uint8_t **packet_data);
+int light_get_next_packet(light_pcapng_t *pcapng, light_packet_interface* lif, light_packet_header *packet_header, const uint8_t **packet_data);
 
-void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packet_header, const uint8_t *packet_data);
+void light_write_packet(light_pcapng_t *pcapng, const light_packet_interface* lif, const light_packet_header *packet_header, const uint8_t *packet_data);
 
 void light_pcapng_close(light_pcapng_t *pcapng);
 

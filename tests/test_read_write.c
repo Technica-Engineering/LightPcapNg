@@ -48,7 +48,7 @@ int main(int argc, const char **args) {
 
 			stat(file, &f_info);
 			if (size != f_info.st_size) {
-				fprintf(stderr, "Memory size mismatch %zu != %zu\n", size, f_info.st_size);
+				fprintf(stderr, "Memory size mismatch %zu != %jd\n", size, f_info.st_size);
 				goto EARLY_FAILURE;
 			}
 			printf("Data for %s: %zu bytes\n", file, size);
