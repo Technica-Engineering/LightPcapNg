@@ -29,7 +29,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 struct _light_pcapng_mem;
 extern int light_pcapng_validate(light_pcapng p0, uint32_t *p1);

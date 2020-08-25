@@ -52,7 +52,7 @@ int main(int argc, const char **args) {
 			uint32_t *subcapture_mem;
 			size_t subcapture_size;
 			FILE *subcapture_file;
-			char subcapture_name[PATH_MAX] = {0,};
+			char subcapture_name[255] = {0,};
 			const char *file_name = file;
 			char *offset;
 

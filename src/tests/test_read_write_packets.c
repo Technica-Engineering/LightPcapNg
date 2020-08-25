@@ -66,7 +66,7 @@ int main(int argc, const char **args) {
 				printf("user app is: %s\n", info->user_app_desc);
 
 			const char *file_write = "output.pcapng";
-			light_pcapng_t *pcapng_write = light_pcapng_open_write(file_write, light_create_default_file_info());
+			light_pcapng_t *pcapng_write = light_pcapng_open_write(file_write, light_create_default_file_info(), 0);
 
 			light_pcapng_t *pcapng_append = light_pcapng_open_append(file_append);
 			//light_pcapng_t *pcapng_write = light_pcapng_open_write(file_write, info);
@@ -101,10 +101,10 @@ int main(int argc, const char **args) {
 							pkt_header.interface_id,
 							pkt_header.data_link,
 							(int)pkt_header.timestamp.tv_sec,
-							(int)pkt_header.timestamp.tv_usec);
+							(int)pkt_header.timestamp.tv_nsec);
 
 					uint16_t comment_len = 15;
-					char comment[comment_len];
+					char comment[15];
 					sprintf(comment, "Packet #%d", index);
 					pkt_header.comment = comment;
 					pkt_header.comment_length = comment_len;

@@ -63,7 +63,7 @@ int main(int argc, const char **args) {
 							pkt_header.interface_id,
 							pkt_header.data_link,
 							(int)pkt_header.timestamp.tv_sec,
-							(int)pkt_header.timestamp.tv_usec);
+							(int)pkt_header.timestamp.tv_nsec);
 					if (pkt_header.comment_length > 0)
 						printf(", comment=\"%s\"\n", pkt_header.comment);
 					else

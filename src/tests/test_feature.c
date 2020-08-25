@@ -26,7 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _WIN32
+#include <winsock.h>
+#pragma comment(lib, "Ws2_32.lib")
+#else
 #include <arpa/inet.h>
+#endif
 
 enum feature_description {
 	FEATURE_PROTOCOL = 0,
