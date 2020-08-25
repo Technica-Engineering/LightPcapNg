@@ -431,6 +431,18 @@ int light_get_next_packet(light_pcapng_t *pcapng, light_packet_header *packet_he
 		if (epb->interface_id < pcapng->file_info->interface_block_count)
 			packet_header->data_link = pcapng->file_info->link_types[epb->interface_id];
 
+		light_option flags_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_FLAGS);
+		if (flags_opt != NULL)
+		{
+			packet_header->flags = (uint32_t*)light_get_option_data(flags_opt);
+		}
+
+		light_option dropcount_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_DROPCOUNT);
+		if (dropcount_opt != NULL)
+		{
+			packet_header->dropcount = (uint64_t*)light_get_option_data(dropcount_opt);
+		}
+
 		*packet_data = (uint8_t*)epb->packet_data;
 	}
 
@@ -453,12 +465,12 @@ int light_get_next_packet(light_pcapng_t *pcapng, light_packet_header *packet_he
 
 	packet_header->comment = NULL;
 	packet_header->comment_length = 0;
-
-	light_option option = light_get_option(pcapng->pcapng, 1); // get comment
-	if (option != NULL)
+	
+	light_option comment_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_COMMENT);
+	if (comment_opt != NULL)
 	{
-		packet_header->comment_length = light_get_option_length(option);
-		packet_header->comment = (char*)light_get_option_data(option);
+		packet_header->comment_length = light_get_option_length(comment_opt);
+		packet_header->comment = (char*)light_get_option_data(comment_opt);
 	}
 
 	return 1;
@@ -531,8 +543,18 @@ void light_write_packet(light_pcapng_t *pcapng, const light_packet_header *packe
 
 	if (packet_header->comment_length > 0)
 	{
-		light_option packet_comment_opt = light_create_option(LIGHT_OPTION_COMMENT, packet_header->comment_length, packet_header->comment);
-		light_add_option(NULL, packet_block_pcapng, packet_comment_opt, LIGHT_FALSE);
+		light_option comment_opt = light_create_option(LIGHT_OPTION_COMMENT, packet_header->comment_length, packet_header->comment);
+		light_add_option(NULL, packet_block_pcapng, comment_opt, LIGHT_FALSE);
+	}
+	if (packet_header->flags > 0)
+	{
+		light_option flags_opt = light_create_option(LIGHT_OPTION_EPB_FLAGS, 8, &packet_header->flags);
+		light_add_option(NULL, packet_block_pcapng, flags_opt, LIGHT_FALSE);
+	}
+	if (packet_header->dropcount > 0)
+	{
+		light_option dropcount_opt = light_create_option(LIGHT_OPTION_EPB_DROPCOUNT, 8, &packet_header->dropcount);
+		light_add_option(NULL, packet_block_pcapng, dropcount_opt, LIGHT_FALSE);
 	}
 
 	if (blocks_to_write == NULL)

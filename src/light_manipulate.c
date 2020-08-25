@@ -31,32 +31,6 @@
 #include <string.h>
 
 
-#if BYTE_ORDER == BIG_ENDIAN
-
-#define LIGHT_HTONS(n) (n)
-#define LIGHT_NTOHS(n) (n)
-#define LIGHT_HTONL(n) (n)
-#define LIGHT_NTOHL(n) (n)
-
-#elif BYTE_ORDER == LITTLE_ENDIAN
-
-#define LIGHT_HTONS(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
-#define LIGHT_NTOHS(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
-
-#define LIGHT_HTONL(n) (((((unsigned long)(n) & 0xFF)) << 24) | \
-                  ((((unsigned long)(n) & 0xFF00)) << 8) | \
-                  ((((unsigned long)(n) & 0xFF0000)) >> 8) | \
-                  ((((unsigned long)(n) & 0xFF000000)) >> 24))
-
-#define LIGHT_NTOHL(n) (((((unsigned long)(n) & 0xFF)) << 24) | \
-                  ((((unsigned long)(n) & 0xFF00)) << 8) | \
-                  ((((unsigned long)(n) & 0xFF0000)) >> 8) | \
-                  ((((unsigned long)(n) & 0xFF000000)) >> 24))
-#else
-#error "Both BIG_ENDIAN or LITTLE_ENDIAN are not #defined"
-#endif
-
-
 light_option light_create_option(const uint16_t option_code, const uint16_t option_length, void *option_value)
 {
 	uint16_t size = 0;

@@ -48,6 +48,9 @@ extern "C" {
 #define LIGHT_OPTION_SHB_USERAPPL          0x0004
 #define LIGHT_OPTION_IF_TSRESOL            0x0009
 
+#define LIGHT_OPTION_EPB_FLAGS             0x0002
+#define LIGHT_OPTION_EPB_DROPCOUNT         0x0004
+
 // Custom option codes
 #define LIGHT_CUSTOM_OPTION_ADDRESS_INFO   0xADD4
 #define LIGHT_CUSTOM_OPTION_FEATURE_U64    0x0064
