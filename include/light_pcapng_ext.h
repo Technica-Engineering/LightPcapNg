@@ -43,7 +43,7 @@ extern "C" {
 #define NULL   ((void *) 0)
 #endif
 
-#define MAX_SUPPORTED_INTERFACE_BLOCKS 32
+#define MAX_SUPPORTED_INTERFACE_BLOCKS 64
 
 struct _light_pcapng_t;
 typedef struct _light_pcapng_t light_pcapng_t;
