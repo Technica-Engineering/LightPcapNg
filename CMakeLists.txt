@@ -23,11 +23,6 @@ add_executable (test_mem.test
     )
 target_link_libraries(test_mem.test light_pcapng_static)
 
-add_executable (test_histogram.test
-    src/tests/test_histogram.c
-    )
-target_link_libraries(test_histogram.test light_pcapng_static)
-
 add_executable (test_subcapture.test
     src/tests/test_subcapture.c
     )

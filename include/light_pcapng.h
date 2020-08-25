@@ -73,11 +73,6 @@ extern "C" {
 typedef struct _light_pcapng *light_pcapng;
 typedef struct _light_option *light_option;
 
-typedef struct _light_pair {
-	uint32_t key;
-	uint32_t val;
-} light_pair;
-
 // Read/Write Functions
 light_pcapng light_read_from_path(const char *file_name);
 light_pcapng light_read_from_memory(const uint32_t *memory, size_t size);
@@ -100,8 +95,6 @@ char *light_pcapng_to_string(light_pcapng pcapng);
 uint32_t light_get_block_count(const light_pcapng pcapng);
 light_pcapng light_get_block(const light_pcapng pcapng, uint32_t index);
 size_t light_get_size(const light_pcapng pcapng);
-void light_pcapng_historgram(const light_pcapng pcapng, uint32_t (*key_master)(const light_pcapng),
-		light_pair **hist, size_t *size, size_t *rejected);
 int light_get_block_info(const light_pcapng pcapng, light_info info_flag, void *info_data, size_t *data_size);
 light_option light_get_option(const light_pcapng pcapng, uint16_t option_code);
 uint16_t light_get_option_code(const light_option option);
