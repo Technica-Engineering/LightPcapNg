@@ -65,7 +65,6 @@ extern "C" {
 #define LIGHT_INVALID_SECTION  -1
 #define LIGHT_OUT_OF_MEMORY    -2
 #define LIGHT_INVALID_ARGUMENT -3
-#define LIGHT_NOT_FOUND        -4
 #define LIGHT_FAILURE          -5
 
 /////////////////////////////// STANDARD PCAPNG STRUCTURES & FUNCTIONS ///////////////////////////////
@@ -109,24 +108,12 @@ int light_update_option(light_pcapng section, light_pcapng pcapng, light_option 
 int light_add_block(light_pcapng block, light_pcapng next_block);
 int light_subcapture(const light_pcapng section, bool (*predicate)(const light_pcapng), light_pcapng *subcapture);
 int light_iterate(const light_pcapng pcapng, bool (*stop_fn)(const light_pcapng, void *), void *args);
-int light_ip_flow(light_pcapng *sectionp, light_pcapng **flows, size_t *flow_count, size_t *dropped);
 
 // Allocation and free functions
 light_option light_alloc_option(uint16_t option_length);
 light_pcapng light_alloc_block(uint32_t block_type, const uint32_t *block_body, uint32_t block_body_length);
 void light_free_option(light_option option);
 void light_free_block(light_pcapng pcapng);
-
-// Advanced Interaction
-typedef enum {
-	LIGHT_FEATURE_BITMASK = 0,
-	LIGHT_FEATURE_BYTE = 1,
-	LIGHT_FEATURE_SHORT = 2,
-	LIGHT_FEATURE_FLOAT = 4,
-	LIGHT_FEATURE_DOUBLE = 5,
-} light_feature_t;
-int light_section_feature_extraction(const light_pcapng section, int (*extractor)(const light_pcapng, void *, size_t),
-		void **feature_vector, const size_t feature_vector_size, const light_feature_t type);
 
 /////////////////////////////// CONTINUOUS MEMORY BLOCK STRUCTURES & FUNCTIONS ///////////////////////////////
 

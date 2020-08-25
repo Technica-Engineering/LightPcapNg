@@ -29,20 +29,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-light_pcapng light_read_from_path(const char *file_name)
+light_pcapng light_read_from_path(const char* file_name)
 {
 	light_pcapng head;
-	uint32_t *memory;
+	uint32_t* memory;
 	size_t size = 0;
 	light_file fd = light_open(file_name, LIGHT_OREAD);
-	DCHECK_ASSERT_EXP(fd != NULL, "could not open file", return NULL);
+
+	if (fd == NULL) {
+		return NULL;
+	}
 
 	size = light_size(fd);
-	DCHECK_INT(size, 0, light_stop);
+	DCHECK_INT(size, 0);
 
 	memory = calloc(size, 1);
 
-	DCHECK_INT(light_read(fd, memory, size), size - 1, light_stop);
+	DCHECK_INT(light_read(fd, memory, size), size - 1);
 
 	head = light_read_from_memory(memory, size);
 
@@ -52,7 +55,7 @@ light_pcapng light_read_from_path(const char *file_name)
 	return head;
 }
 
-int light_pcapng_to_file(const char *file_name, const light_pcapng pcapng)
+int light_pcapng_to_file(const char* file_name, const light_pcapng pcapng)
 {
 	light_file fd = light_open(file_name, LIGHT_OWRITE);
 	size_t written = 0;
@@ -64,7 +67,7 @@ int light_pcapng_to_file(const char *file_name, const light_pcapng pcapng)
 	return written > 0 ? LIGHT_SUCCESS : LIGHT_FAILURE;
 }
 
-int light_pcapng_to_compressed_file(const char *file_name, const light_pcapng pcapng, int compression_level)
+int light_pcapng_to_compressed_file(const char* file_name, const light_pcapng pcapng, int compression_level)
 {
 	light_file fd = light_open_compression(file_name, LIGHT_OWRITE, compression_level);
 	size_t written = 0;

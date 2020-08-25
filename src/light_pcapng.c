@@ -63,8 +63,8 @@ static struct _light_option *__parse_options(uint32_t **memory, const int32_t ma
       remaining_size = max_len - actual_length - 2 * sizeof(*local_memory);
 
       if (opt->custom_option_code == 0) {
-         DCHECK_ASSERT(opt->option_length, 0, light_stop);
-         DCHECK_ASSERT(remaining_size, 0, light_stop);
+         DCHECK_ASSERT(opt->option_length, 0);
+         DCHECK_ASSERT(remaining_size, 0);
 
          if (remaining_size) {
             // XXX: Treat the remaining data as garbage and discard it form the trace.
@@ -91,7 +91,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
    {
       case LIGHT_SECTION_HEADER_BLOCK:
       {
-         DPRINT_HERE(LIGHT_SECTION_HEADER_BLOCK);
          struct _light_section_header *shb = calloc(1, sizeof(struct _light_section_header));
          struct _light_option *opt = NULL;
          uint32_t version;
@@ -114,7 +113,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
 
       case LIGHT_INTERFACE_BLOCK:
       {
-         DPRINT_HERE(LIGHT_INTERFACE_BLOCK);
          struct _light_interface_description_block *idb = calloc(1, sizeof(struct _light_interface_description_block));
          struct _light_option *opt = NULL;
          uint32_t link_reserved = *local_data++;
@@ -132,7 +130,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
 
       case LIGHT_ENHANCED_PACKET_BLOCK:
       {
-         DPRINT_HERE(LIGHT_ENHANCED_PACKET_BLOCK);
          struct _light_enhanced_packet_block *epb = NULL;
          struct _light_option *opt = NULL;
          uint32_t interface_id = *local_data++;
@@ -163,7 +160,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
 
       case LIGHT_SIMPLE_PACKET_BLOCK:
       {
-         DPRINT_HERE(LIGHT_SIMPLE_PACKET_BLOCK);
          struct _light_simple_packet_block *spb = NULL;
          uint32_t original_packet_length = *local_data++;
          uint32_t actual_len = current->block_total_length - 2 * sizeof(current->block_total_length) - sizeof(current->block_type) - sizeof(original_packet_length);
@@ -180,7 +176,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
 
       case LIGHT_CUSTOM_DATA_BLOCK:
       {
-         DPRINT_HERE(LIGHT_CUSTOM_DATA_BLOCK);
          struct _light_custom_nonstandard_block *cnb = NULL;
          struct _light_option *opt = NULL;
          uint32_t len = *local_data++;
@@ -206,7 +201,6 @@ void parse_by_block_type(struct _light_pcapng *current, const uint32_t *local_da
 
       default: // Could not find registered block type. Copying data as RAW.
       {
-         DPRINT_HERE(default);
          uint32_t raw_size = current->block_total_length - 2 * sizeof(current->block_total_length) - sizeof(current->block_type);
          if (raw_size > 0)
          {
@@ -253,13 +247,13 @@ static size_t __parse_mem_copy(struct _light_pcapng **iter, const uint32_t *memo
 
       current->block_type = *local_data++;
       current->block_total_length = *local_data++;
-      DCHECK_INT(((current->block_total_length % 4) == 0), 0, light_stop);
+      DCHECK_INT(((current->block_total_length % 4) == 0), 0);
 
       parse_by_block_type(current, local_data, memory);
 
       // Compute offset and return new link.
       // Block total length.
-      DCHECK_ASSERT((bytes_read = *local_data++), current->block_total_length, light_stop);
+      DCHECK_ASSERT((bytes_read = *local_data++), current->block_total_length);
 
       bytes_read = current->block_total_length;
       remaining -= bytes_read;
@@ -461,7 +455,7 @@ uint32_t *light_pcapng_to_memory(const light_pcapng pcapng, size_t *size)
       memcpy(&block_offset[2 + body_length / 4], option_mem, option_length);
       block_offset[iterator->block_total_length / 4 - 1] = iterator->block_total_length;
 
-      DCHECK_ASSERT(iterator->block_total_length, body_length + option_length + 3 * sizeof(uint32_t), light_stop);
+      DCHECK_ASSERT(iterator->block_total_length, body_length + option_length + 3 * sizeof(uint32_t));
       block_offset += iterator->block_total_length / 4;
       bytes -= iterator->block_total_length;
       *size += iterator->block_total_length;
@@ -501,7 +495,7 @@ size_t light_pcapng_to_file_stream(const light_pcapng pcapng, light_file file)
       memcpy(&block_mem[2 + body_length / 4], option_mem, option_length);
       block_mem[iterator->block_total_length / 4 - 1] = iterator->block_total_length;
 
-      DCHECK_ASSERT(iterator->block_total_length, body_length + option_length + 3 * sizeof(uint32_t), light_stop);
+      DCHECK_ASSERT(iterator->block_total_length, body_length + option_length + 3 * sizeof(uint32_t));
 
       free(option_mem);
       total_bytes += iterator->block_total_length;

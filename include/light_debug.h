@@ -31,40 +31,30 @@ extern "C" {
 #include <stdio.h>
 
 #ifdef _LIGHT_DEBUG_MODE
-#define light_stop          getchar()
-#define DPRINT_HERE(symbol) fprintf(stderr, "%s::%s::%d, %s\n", __FILE__, __FUNCTION__, __LINE__, #symbol)
+#define __light_stop          getchar()
 #else
-#define light_stop          (void)0
-#define DPRINT_HERE(symbol) (void)#symbol
+#define __light_stop          (void)0
 #endif
 
 // XXX: Warning: I should not use these macros with functions!!! Undefined for Release.
 
-#define DCHECK_INT(x, y, other)	do { \
+#define DCHECK_INT(x, y)	do { \
 		int x_ret = (int)(x); \
 		int y_ret = (int)(y); \
 		if (x_ret <= y_ret) { \
 			fprintf(stderr, "ERROR at %s::%s::%d: %d <= %d\n", \
 					__FILE__, __FUNCTION__, __LINE__, x_ret, y_ret); \
-			other; \
+			__light_stop; \
 		} \
 	} while (0)
 
-#define DCHECK_ASSERT(x, y, other)	do { \
+#define DCHECK_ASSERT(x, y)	do { \
 		int x_ret = (int)(x); \
 		int y_ret = (int)(y); \
 		if (x_ret != y_ret) { \
 			fprintf(stderr, "ERROR at %s::%s::%d: %d != %d\n", \
 					__FILE__, __FUNCTION__, __LINE__, x_ret, y_ret); \
-			other; \
-		} \
-	} while (0)
-
-#define DCHECK_ASSERT_EXP(expression, err_message, other) do { \
-		if (!(expression)) {\
-			fprintf(stderr, "ERROR at %s::%s::%d: %s\n", \
-					__FILE__, __FUNCTION__, __LINE__, err_message); \
-			other; \
+			__light_stop; \
 		} \
 	} while (0)
 
@@ -77,17 +67,7 @@ extern "C" {
 		} \
 	} while (0)
 
-#define PCAPNG_WARNING(symbol) fprintf(stderr, "Warning at: %s::%s::%d, %s\n", __FILE__, __FUNCTION__, __LINE__, #symbol)
 #define PCAPNG_ERROR(symbol)   fprintf(stderr, "Error at: %s::%s::%d, %s\n", __FILE__, __FUNCTION__, __LINE__, #symbol)
-
-#ifdef  _MSC_VER
-#define __attribute__(x)
-#endif //  _MSC_VER
-
-#define PCAPNG_ATTRIBUTE_SLOW __attribute__((warning ("slow for large traces")))
-#define PCAPNG_ATTRIBUTE_DEPRECATED __attribute__((warning ("deprecated function")))
-#define PCAPNG_ATTRIBUTE_UNTESTED __attribute__((warning ("unit test required")))
-#define PCAPNG_ATTRIBUTE_REFACTOR __attribute__((warning ("should be refactored")))
 
 #ifdef __cplusplus
 }

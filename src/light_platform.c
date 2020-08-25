@@ -36,23 +36,20 @@
 #define UNDEF_MAX_MIN
 #endif
 
-
-#ifdef UNIVERSAL
-
-light_file light_open_decompression(const char *file_name, const __read_mode_t mode)
+light_file light_open_decompression(const char* file_name, const __read_mode_t mode)
 {
 	light_file fd = calloc(1, sizeof(light_file_t));
-	fd->file = INVALID_FILE;
+	fd->file = NULL;
 	fd->decompression_context = light_get_decompression_context();
 
 	switch (mode)
 	{
-		case LIGHT_OREAD:
-			fd->file = fopen(file_name, "rb");
-			break;
+	case LIGHT_OREAD:
+		fd->file = fopen(file_name, "rb");
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	if (fd->file)
@@ -65,10 +62,10 @@ light_file light_open_decompression(const char *file_name, const __read_mode_t m
 	}
 }
 
-light_file light_open(const char *file_name, const __read_mode_t mode)
+light_file light_open(const char* file_name, const __read_mode_t mode)
 {
-	light_file fd = calloc(1,sizeof(light_file_t));
-	fd->file = INVALID_FILE;
+	light_file fd = calloc(1, sizeof(light_file_t));
+	fd->file = NULL;
 	fd->compression_context = NULL;
 	fd->decompression_context = NULL;
 
@@ -100,10 +97,10 @@ light_file light_open(const char *file_name, const __read_mode_t mode)
 	}
 }
 
-light_file light_open_compression(const char *file_name, const __read_mode_t mode, int compression_level)
+light_file light_open_compression(const char* file_name, const __read_mode_t mode, int compression_level)
 {
 	light_file fd = calloc(1, sizeof(light_file_t));
-	fd->file = INVALID_FILE;
+	fd->file = NULL;
 
 	assert(0 <= compression_level && 10 >= compression_level);
 	compression_level = max(0, compression_level);
@@ -113,16 +110,16 @@ light_file light_open_compression(const char *file_name, const __read_mode_t mod
 
 	switch (mode)
 	{
-		case LIGHT_OWRITE:
-			fd->file = fopen(file_name, "wb");
-			break;
-			//TODO Not so sure about allowing appends... I think you can get away with this in Zstd 
-			//but i dont know about other compression algorithms!
-		/*case LIGHT_OAPPEND:
-			fd->file = fopen(file_name, "ab");
-			break;*/
-		default:
-			break;
+	case LIGHT_OWRITE:
+		fd->file = fopen(file_name, "wb");
+		break;
+		//TODO Not so sure about allowing appends... I think you can get away with this in Zstd 
+		//but i dont know about other compression algorithms!
+	/*case LIGHT_OAPPEND:
+		fd->file = fopen(file_name, "ab");
+		break;*/
+	default:
+		break;
 	}
 
 	if (fd->file)
@@ -137,7 +134,7 @@ light_file light_open_compression(const char *file_name, const __read_mode_t mod
 
 
 
-size_t light_read(light_file fd, void *buf, size_t count)
+size_t light_read(light_file fd, void* buf, size_t count)
 {
 	if (fd->decompression_context == NULL)
 	{
@@ -150,7 +147,7 @@ size_t light_read(light_file fd, void *buf, size_t count)
 	}
 }
 
-size_t light_write(light_file fd, const void *buf, size_t count)
+size_t light_write(light_file fd, const void* buf, size_t count)
 {
 	if (fd->compression_context == NULL)
 	{
@@ -177,35 +174,15 @@ size_t light_size(light_file fd)
 
 int light_close(light_file fd)
 {
+	fflush(fd->file);
 	light_close_compresssed(fd);
 	return fclose(fd->file);
 }
 
-int light_flush(light_file fd)
-{
-	return fflush(fd->file);
-}
-
-int light_eof(light_file fd)
-{
-	return feof(fd->file);
-}
-
-light_file_pos_t light_get_pos(light_file fd)
-{
-	return ftell(fd->file);
-}
-
-light_file_pos_t light_set_pos(light_file fd, light_file_pos_t pos)
+long light_set_pos(light_file fd, long pos)
 {
 	return fseek(fd->file, pos, SEEK_SET);
 }
-
-#else
-
-#error UNIMPLEMENRTED
-
-#endif
 
 #if defined(UNDEF_MAX_MIN)
 #undef max

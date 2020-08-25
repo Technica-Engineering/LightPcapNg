@@ -95,7 +95,7 @@ int light_add_option(light_pcapng section, light_pcapng pcapng, light_option opt
 		shb->section_length += option_size;
 	}
 	else if (section != NULL) {
-		PCAPNG_WARNING("PCAPNG block is not section header!");
+		PCAPNG_ERROR("PCAPNG block is not section header!");
 	}
 
 	return LIGHT_SUCCESS;
@@ -129,7 +129,7 @@ int light_update_option(light_pcapng section, light_pcapng pcapng, light_option 
 			shb->section_length += data_size_diff;
 		}
 		else {
-			PCAPNG_WARNING("PCAPNG block is not section header!");
+			PCAPNG_ERROR("PCAPNG block is not section header!");
 		}
 
 		iterator->option_length = option->option_length;

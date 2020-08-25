@@ -40,10 +40,6 @@ extern "C" {
 #include <sys/time.h>
 #endif
 
-#ifndef NULL
-#define NULL   ((void *) 0)
-#endif
-
 #define MAX_SUPPORTED_INTERFACE_BLOCKS 64
 
 struct _light_pcapng_t;
@@ -61,20 +57,29 @@ typedef struct _light_packet_header {
 	uint64_t dropcount;
 } light_packet_header;
 
+typedef struct _light_interface {
+	uint16_t link_type;
+	double timestamp_resolution;
+} light_interface;
+
 typedef struct _light_pcapng_file_info {
 	uint16_t major_version;
 	uint16_t minor_version;
+
 	char *file_comment;
 	size_t file_comment_size;
+
 	char *hardware_desc;
 	size_t hardware_desc_size;
+
 	char *os_desc;
 	size_t os_desc_size;
+
 	char *user_app_desc;
 	size_t user_app_desc_size;
-	size_t interface_block_count;
-	uint16_t link_types[MAX_SUPPORTED_INTERFACE_BLOCKS];
-	double timestamp_resolution[MAX_SUPPORTED_INTERFACE_BLOCKS];
+	
+	light_interface interfaces[MAX_SUPPORTED_INTERFACE_BLOCKS];
+	size_t interfaces_count;
 
 } light_pcapng_file_info;
 

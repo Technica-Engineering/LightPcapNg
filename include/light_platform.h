@@ -24,10 +24,6 @@
 #ifndef INCLUDE_LIGHT_PLATFORM_H_
 #define INCLUDE_LIGHT_PLATFORM_H_
 
-#ifndef UNIVERSAL
-#define UNIVERSAL
-#endif // UNIVERSAL
-
 #include <stddef.h>
 #include "light_internal.h"
 #include "light_file.h"
@@ -38,26 +34,11 @@ typedef enum {
 	LIGHT_OAPPEND,
 } __read_mode_t;
 
-#ifdef UNIVERSAL
-
-typedef long light_file_pos_t;
-#define INVALID_FILE NULL
-
-#else
-
-#error UNIMPLEMENRTED
-
-#endif
-
 light_file light_open(const char *file_name, const __read_mode_t mode);
 light_file light_open_compression(const char *file_name, const __read_mode_t mode, int compression_level);
 size_t light_read(light_file fd, void *buf, size_t count);
 size_t light_write(light_file fd, const void *buf, size_t count);
 size_t light_size(light_file fd);
 int light_close(light_file fd);
-int light_flush(light_file fd);
-int light_eof(light_file fd);
-light_file_pos_t light_get_pos(light_file fd);
-light_file_pos_t light_set_pos(light_file fd, light_file_pos_t);
 
 #endif /* INCLUDE_LIGHT_PLATFORM_H_ */
