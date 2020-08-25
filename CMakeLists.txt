@@ -38,11 +38,6 @@ add_executable (test_feature.test
     )
 target_link_libraries(test_feature.test light_pcapng_static)
 
-add_executable (test_flow.test
-    src/tests/test_flow.c
-    )
-target_link_libraries(test_flow.test light_pcapng_static)
-
 add_executable (test_read_packets.test
     src/tests/test_read_packets.c
     )
