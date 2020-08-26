@@ -57,7 +57,7 @@ int main(int argc, const char** args) {
 					break;
 
 				if (pkt_data != NULL) {
-					printf("packet #%d: orig_len=%d, cap_len=%d, iface=%s, data_link=%d, timestamp=%d.%06d",
+					printf("packet #%d: orig_len=%d, cap_len=%d, iface=%s, data_link=%d, timestamp=%d.%09d",
 						index,
 						pkt_header.original_length,
 						pkt_header.captured_length,

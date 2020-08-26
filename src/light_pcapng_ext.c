@@ -85,13 +85,10 @@ static light_pcapng_file_info* __create_file_info(light_pcapng pcapng_head)
 	return file_info;
 }
 
-static double __power_of(int x, int y)
+static uint64_t __power_of(uint64_t x, uint64_t y)
 {
 	int i;
-	double res = 1;
-
-	if (y < 0)
-		return 1 / __power_of(x, -y);
+	uint64_t res = 1;
 
 	for (i = 0; i < y; i++)
 		res *= x;
@@ -118,29 +115,24 @@ static void __append_interface_block_to_file_info(const light_pcapng interface_b
 	ts_resolution_option = light_get_option(interface_block, LIGHT_OPTION_IF_TSRESOL);
 	if (ts_resolution_option == NULL)
 	{
-		lif.timestamp_resolution = __power_of(10, -6);
+		lif.timestamp_resolution = 1e6;
 	}
 	else
 	{
 		int8_t tsresol = *((int8_t*)light_get_option_data(ts_resolution_option));
 		if (tsresol >= 0)
 		{
-			lif.timestamp_resolution = __power_of(10, -tsresol);
+			lif.timestamp_resolution = __power_of(10, tsresol);
 		}
 		else
 		{
-			lif.timestamp_resolution = __power_of(2, tsresol);
+			lif.timestamp_resolution = __power_of(2, -tsresol);
 		}
 	}
 
 	info->interfaces[info->interfaces_count++] = lif;
 	info->interfaces_count++;
 }
-
-// if timestamp of the packet contains number of seconds, which exceeds a limit, with which it will be possible to
-// write it with nsec precision, we invalidate that timestamp, but still write the packet; this makes sense, as
-// such timestamps (> 18446744073) refer to year (> 2554), so we can allow ourselves not to support them for now
-static const uint64_t MAXIMUM_PACKET_SECONDS_VALUE = UINT64_MAX / 1000000000;
 
 light_pcapng_t* light_pcapng_open_read(const char* file_path, bool read_all_interfaces)
 {
@@ -372,22 +364,15 @@ int light_get_next_packet(light_pcapng_t* pcapng, light_packet_interface* lif, l
 		timestamp += epb->timestamp_low;
 
 		*lif = pcapng->file_info->interfaces[epb->interface_id];
-		double timestamp_res = lif->timestamp_resolution;
+		uint64_t ts_res = lif->timestamp_resolution;
 
-		uint64_t packet_secs = timestamp * timestamp_res;
-		if (packet_secs <= MAXIMUM_PACKET_SECONDS_VALUE && packet_secs != 0)
-		{
-			packet_header->timestamp.tv_sec = packet_secs;
-			packet_header->timestamp.tv_nsec =
-				(timestamp - (packet_secs / timestamp_res))	// number of time units less than seconds
-				* timestamp_res								// shift . to the left to get 0.{previous_number}
-				* 1000000000;								// get the nanoseconds
-		}
-		else
-		{
-			packet_header->timestamp.tv_sec = 0;
-			packet_header->timestamp.tv_nsec = 0;
-		}
+		uint64_t ts_secs = timestamp / ts_res;
+		uint64_t ts_frac = timestamp % ts_res;
+		uint64_t ts_nsec = ts_frac * 1000000000 / ts_res;
+
+		packet_header->timestamp.tv_sec = ts_secs;
+		packet_header->timestamp.tv_nsec = ts_nsec;
+
 
 		light_option flags_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_FLAGS);
 		if (flags_opt != NULL)
@@ -468,14 +453,9 @@ void light_write_packet(light_pcapng_t* pcapng, const light_packet_interface* li
 	struct _light_enhanced_packet_block* epb = (struct _light_enhanced_packet_block*)epb_memory;
 	epb->interface_id = iface_id;
 
-	uint64_t timestamp, packet_secs = (uint64_t)packet_header->timestamp.tv_sec;
-	if (sizeof(packet_header->timestamp.tv_sec) < sizeof(packet_secs))
-		packet_secs = 0x00000000FFFFFFFF & packet_secs;
+	struct timespec ts = packet_header->timestamp;
+	uint64_t timestamp = ts.tv_sec * (uint64_t)1e9 + (uint64_t)ts.tv_nsec;
 
-	if (packet_secs <= MAXIMUM_PACKET_SECONDS_VALUE && packet_secs != 0)
-		timestamp = packet_secs * (uint64_t)1000000000 + (uint64_t)packet_header->timestamp.tv_nsec;
-	else
-		timestamp = 0;
 	epb->timestamp_high = timestamp >> 32;
 	epb->timestamp_low = timestamp & 0xFFFFFFFF;
 

@@ -29,6 +29,7 @@ target_link_libraries(light_pcapng_static ${CONAN_LIBS})
 
 if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 
+    include(CTest)
     file(GLOB LIGHT_TESTS tests/*.c)
 
     foreach(test_file ${LIGHT_TESTS})
@@ -36,6 +37,11 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
         
         add_executable(${test_name}.test ${test_file})
         target_link_libraries(${test_name}.test light_pcapng_static)
+
+        add_test(
+            NAME ${test_name} 
+            COMMAND ${test_name}.test "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
+        )
     endforeach()
 
 endif()

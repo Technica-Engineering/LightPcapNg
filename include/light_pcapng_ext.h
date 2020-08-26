@@ -57,7 +57,7 @@ typedef struct _light_interface {
 	uint16_t link_type;
 	char* name;
 	char* description;
-	double timestamp_resolution;
+	uint64_t timestamp_resolution;
 
 } light_packet_interface;
 
