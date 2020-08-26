@@ -27,8 +27,8 @@
 #include <stdio.h>
 #include "light_compression.h"
 
-typedef _compression_t *light_compression;
-typedef _decompression_t *light_decompression;
+typedef _compression_t* light_compression;
+typedef _decompression_t* light_decompression;
 
 typedef struct light_file_t
 {
@@ -38,6 +38,6 @@ typedef struct light_file_t
 
 } light_file_t;
 
-typedef light_file_t *light_file;
+typedef light_file_t* light_file;
 
 #endif /* INCLUDE_LIGHT_FILE_H_ */

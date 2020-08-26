@@ -1,41 +1,41 @@
 cmake_minimum_required(VERSION 3.17)
 
-project (light_pcapng C)
+project(light_pcapng C)
+
+# Get dependencies from conan
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+                  "${CMAKE_BINARY_DIR}/conan.cmake")
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+conan_cmake_run(REQUIRES zstd/1.4.0@bincrafters/stable
+                BASIC_SETUP)
+
+# Configuration
+add_compile_definitions(USE_Z_STD)
 
 include_directories("include")
 
 file(GLOB LIGHT_SOURCES src/*.c)
 
 add_library (light_pcapng SHARED ${LIGHT_SOURCES})
+target_link_libraries(light_pcapng ${CONAN_LIBS})
 
 add_library (light_pcapng_static STATIC ${LIGHT_SOURCES})
+target_link_libraries(light_pcapng_static ${CONAN_LIBS})
 
-add_executable (test_read.test
-    tests/test_read.c
-    )
-target_link_libraries(test_read.test light_pcapng_static)
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 
-add_executable (test_read_write.test
-    tests/test_read_write.c
-    )
-target_link_libraries(test_read_write.test light_pcapng_static)
+    file(GLOB LIGHT_TESTS tests/*.c)
 
-add_executable (test_mem.test
-    tests/test_mem.c
-    )
-target_link_libraries(test_mem.test light_pcapng_static)
+    foreach(test_file ${LIGHT_TESTS})
+        get_filename_component(test_name ${test_file} NAME_WE)
+        
+        add_executable(${test_name}.test ${test_file})
+        target_link_libraries(${test_name}.test light_pcapng_static)
+    endforeach()
 
-add_executable (test_subcapture.test
-    tests/test_subcapture.c
-    )
-target_link_libraries(test_subcapture.test light_pcapng_static)
-
-add_executable (test_read_packets.test
-    tests/test_read_packets.c
-    )
-target_link_libraries(test_read_packets.test light_pcapng_static)
-
-add_executable (test_read_write_packets.test
-    tests/test_read_write_packets.c
-    )
-target_link_libraries(test_read_write_packets.test light_pcapng_static)
+endif()

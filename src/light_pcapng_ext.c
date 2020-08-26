@@ -285,28 +285,28 @@ light_pcapng_file_info* light_create_file_info(const char* os_desc, const char* 
 {
 	light_pcapng_file_info* info = light_create_default_file_info();
 
-	if (os_desc != NULL && strlen(os_desc) > 0)
+	if (os_desc != NULL)
 	{
 		size_t os_len = strlen(os_desc);
 		info->os_desc = calloc(os_len + 1, sizeof(char));
 		memcpy(info->os_desc, os_desc, os_len);
 	}
 
-	if (hardware_desc != NULL && strlen(hardware_desc) > 0)
+	if (hardware_desc != NULL)
 	{
 		size_t hw_len = strlen(hardware_desc);
 		info->hardware_desc = calloc(hw_len + 1, sizeof(char));
 		memcpy(info->hardware_desc, hardware_desc, hw_len);
 	}
 
-	if (user_app_desc != NULL && strlen(user_app_desc) > 0)
+	if (user_app_desc != NULL)
 	{
 		size_t app_len = strlen(user_app_desc);
 		info->user_app_desc = calloc(app_len + 1, sizeof(char));
 		memcpy(info->user_app_desc, user_app_desc, app_len);
 	}
 
-	if (file_comment != NULL && strlen(file_comment) > 0)
+	if (file_comment != NULL)
 	{
 		size_t comment_len = strlen(file_comment);
 		info->file_comment = calloc(comment_len + 1, sizeof(char));
@@ -318,18 +318,10 @@ light_pcapng_file_info* light_create_file_info(const char* os_desc, const char* 
 
 void light_free_file_info(light_pcapng_file_info* info)
 {
-	if (info->user_app_desc != NULL)
-		free(info->user_app_desc);
-
-	if (info->file_comment != NULL)
-		free(info->file_comment);
-
-	if (info->hardware_desc != NULL)
-		free(info->hardware_desc);
-
-	if (info->os_desc != NULL)
-		free(info->os_desc);
-
+	free(info->user_app_desc);
+	free(info->file_comment);
+	free(info->hardware_desc);
+	free(info->os_desc);
 	free(info);
 }
 
@@ -455,7 +447,7 @@ void light_write_packet(light_pcapng_t* pcapng, const light_packet_interface* li
 	// in case interface ID of packet block to be written does not exist - was not read previously
 	if (iface_id >= pcapng->file_info->interfaces_count)
 	{
-		struct _light_interface_description_block interface_block = {0};
+		struct _light_interface_description_block interface_block = { 0 };
 		interface_block.link_type = lif->link_type;
 
 		light_pcapng iface_block_pcapng = light_alloc_block(LIGHT_INTERFACE_BLOCK, (const uint32_t*)&interface_block, sizeof(struct _light_interface_description_block) + 3 * sizeof(uint32_t));
@@ -472,7 +464,7 @@ void light_write_packet(light_pcapng_t* pcapng, const light_packet_interface* li
 	size_t option_size = sizeof(struct _light_enhanced_packet_block) + packet_header->captured_length;
 	PADD32(option_size, &option_size);
 	uint8_t* epb_memory = calloc(1, option_size);
-	//memset(epb_memory, 0, option_size); should be redundant with calloc
+
 	struct _light_enhanced_packet_block* epb = (struct _light_enhanced_packet_block*)epb_memory;
 	epb->interface_id = iface_id;
 
@@ -500,12 +492,12 @@ void light_write_packet(light_pcapng_t* pcapng, const light_packet_interface* li
 		light_option comment_opt = light_create_option(LIGHT_OPTION_COMMENT, strlen(packet_header->comment), packet_header->comment);
 		light_add_option(NULL, packet_block_pcapng, comment_opt, false);
 	}
-	if (packet_header->flags > 0)
+	if (packet_header->flags)
 	{
 		light_option flags_opt = light_create_option(LIGHT_OPTION_EPB_FLAGS, 8, &packet_header->flags);
 		light_add_option(NULL, packet_block_pcapng, flags_opt, false);
 	}
-	if (packet_header->dropcount > 0)
+	if (packet_header->dropcount)
 	{
 		light_option dropcount_opt = light_create_option(LIGHT_OPTION_EPB_DROPCOUNT, 8, &packet_header->dropcount);
 		light_add_option(NULL, packet_block_pcapng, dropcount_opt, false);
