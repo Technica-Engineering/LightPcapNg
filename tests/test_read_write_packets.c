@@ -104,7 +104,7 @@ int main(int argc, const char **args) {
 						(int)pkt_header.timestamp.tv_sec,
 						(int)pkt_header.timestamp.tv_nsec);
 
-					char comment[16];
+					char comment[24];
 					sprintf(comment, "Packet #%i", index);
 					pkt_header.comment = comment;
 
