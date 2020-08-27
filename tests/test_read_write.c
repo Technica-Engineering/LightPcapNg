@@ -29,8 +29,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define TMP_FILE	"/tmp/pcapng.tmp"
-
 int main(int argc, const char **args) {
 	int i;
 
@@ -38,7 +36,7 @@ int main(int argc, const char **args) {
 		const char *file = args[i];
 		light_pcapng pcapng = light_read_from_path(file);
 		if (pcapng != NULL) {
-			FILE *tmp = fopen(TMP_FILE, "wb");
+			FILE *tmp = tmpfile();
 			size_t size;
 			uint32_t *data = light_pcapng_to_memory(pcapng, &size);
 			struct stat f_info;
