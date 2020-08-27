@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.10)
 
 project(light_pcapng C)
 
@@ -15,7 +15,7 @@ conan_cmake_run(REQUIRES zstd/1.4.0@bincrafters/stable
                 BASIC_SETUP)
 
 # Configuration
-add_compile_definitions(USE_Z_STD)
+add_definitions(-DUSE_Z_STD)
 
 include_directories("include")
 

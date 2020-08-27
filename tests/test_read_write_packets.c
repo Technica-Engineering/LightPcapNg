@@ -105,7 +105,7 @@ int main(int argc, const char **args) {
 						(int)pkt_header.timestamp.tv_nsec);
 
 					char comment[16];
-					sprintf(comment, "Packet #%d", index);
+					sprintf(comment, "Packet #%i", index);
 					pkt_header.comment = comment;
 
 					light_write_packet(pcapng_write, &pkt_interface, &pkt_header, pkt_data);

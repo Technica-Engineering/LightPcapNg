@@ -102,7 +102,7 @@ uint32_t *light_get_option_data(const light_option option);
 uint16_t light_get_option_length(const light_option option);
 
 // Manipulation Functions
-light_option light_create_option(const uint16_t option_code, const uint16_t option_length, void *option_value);
+light_option light_create_option(const uint16_t option_code, const uint16_t option_length, const void *option_value);
 int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, bool copy);
 int light_update_option(light_pcapng section, light_pcapng pcapng, light_option option);
 int light_add_block(light_pcapng block, light_pcapng next_block);
