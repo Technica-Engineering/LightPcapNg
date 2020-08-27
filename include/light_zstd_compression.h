@@ -23,7 +23,7 @@
 
 #ifndef INCLUDE_LIGHT_ZSTD_COMPRESSION_H_
 #define INCLUDE_LIGHT_ZSTD_COMPRESSION_H_
-#if defined(USE_Z_STD)
+#if defined(USE_ZSTD)
 
 #include <stdint.h>
 #include <zstd.h>      // presumes zstd library is installed
@@ -79,5 +79,5 @@ size_t write_zstd_compressed(struct light_file_t *fd, const void *buf, size_t co
 
 int close_zstd_compresssed(struct light_file_t *fd);
 
-#endif //USE_Z_STD
+#endif //USE_ZSTD
 #endif /* INCLUDE_LIGHT_ZSTD_COMPRESSION_H_ */
