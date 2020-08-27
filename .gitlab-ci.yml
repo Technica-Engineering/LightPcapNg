@@ -1,0 +1,12 @@
+.test:
+  before_script:
+    - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan --force
+  script:
+    - cmake . -DCMAKE_BUILD_TYPE=Release -DLIGHT_USE_ZSTD=OFF
+    - cmake --build . --config Release
+    - ctest --build-config Release
+
+windows:
+  extends: .test
+  tags:
+    - windows
