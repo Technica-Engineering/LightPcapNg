@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 //This block should include the compression type you want to build for
-#if defined(USE_Z_STD)
+#if defined(USE_ZSTD)
 #include "light_zstd_compression.h"
 //Setup some other compression
 #elif defined(USE_THIS_COMPRESSION_INSTEAD)

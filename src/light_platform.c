@@ -64,11 +64,8 @@ light_file light_open_decompression(const char* file_name, const __read_mode_t m
 
 light_file light_open(const char* file_name, const __read_mode_t mode)
 {
-	light_file fd = calloc(1, sizeof(light_file_t));
-	fd->file = NULL;
-	fd->compression_context = NULL;
-	fd->decompression_context = NULL;
-
+	FILE* file = NULL;
+	
 	switch (mode) {
 	case LIGHT_OREAD:
 	{
@@ -76,19 +73,22 @@ light_file light_open(const char* file_name, const __read_mode_t mode)
 		{
 			return light_open_decompression(file_name, mode);
 		}
-		fd->file = fopen(file_name, "rb");
+		file = fopen(file_name, "rb");
 		break;
 	}
 	case LIGHT_OWRITE:
-		fd->file = fopen(file_name, "wb");
+		file = fopen(file_name, "wb");
 		break;
 	case LIGHT_OAPPEND:
-		fd->file = fopen(file_name, "ab");
+		file = fopen(file_name, "ab");
 		break;
 	}
 
-	if (fd->file)
+	
+	if (file)
 	{
+		light_file fd = calloc(1, sizeof(light_file_t));
+		fd->file = file;
 		return fd;
 	}
 	else
@@ -176,7 +176,9 @@ int light_close(light_file fd)
 {
 	fflush(fd->file);
 	light_close_compresssed(fd);
-	return fclose(fd->file);
+	int ret = fclose(fd->file);
+	free(fd);
+	return ret;
 }
 
 long light_set_pos(light_file fd, long pos)

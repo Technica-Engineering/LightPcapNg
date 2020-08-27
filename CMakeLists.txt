@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif()
+
+
 project(light_pcapng C)
 
 # Get dependencies from conan
@@ -14,6 +21,13 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_run(REQUIRES zstd/1.4.0@bincrafters/stable
                 BASIC_SETUP)
 
+find_program(DRMEMORY_FOUND "drmemory")
+if(DRMEMORY_FOUND)
+    message("drmemory found")
+    # Needed so Dr. Memory can work correctly
+    # See https://dynamorio.org/drmemory_docs/page_prep.html
+    string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+endif()
 
 
 # Configuration
@@ -22,8 +36,8 @@ include_directories("include")
 
 file(GLOB LIGHT_SOURCES src/*.c)
 
-add_library (light_pcapng SHARED ${LIGHT_SOURCES})
-add_library (light_pcapng_static STATIC ${LIGHT_SOURCES})
+add_library(light_pcapng SHARED ${LIGHT_SOURCES})
+add_library(light_pcapng_static STATIC ${LIGHT_SOURCES})
 
 # ZSTD
 
@@ -43,13 +57,23 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
     foreach(test_file ${LIGHT_TESTS})
         get_filename_component(test_name ${test_file} NAME_WE)
         
-        add_executable(${test_name}.test ${test_file})
-        target_link_libraries(${test_name}.test light_pcapng_static)
+        add_executable(${test_name} ${test_file})
+        target_link_libraries(${test_name} light_pcapng_static)
 
         add_test(
             NAME ${test_name} 
-            COMMAND ${test_name}.test "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
+            COMMAND ${test_name} "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
         )
+        if(DRMEMORY_FOUND)
+            add_test(
+                NAME ${test_name}_drmemory
+                COMMAND "drmemory" 
+                    "-batch"
+                    "-exit_code_if_errors" "99"
+                    $<TARGET_FILE:${test_name}> "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
+            ) 
+        endif()
+
     endforeach()
 
 endif()

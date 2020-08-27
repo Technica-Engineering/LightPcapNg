@@ -115,7 +115,7 @@ static void __append_interface_block_to_file_info(const light_pcapng interface_b
 	ts_resolution_option = light_get_option(interface_block, LIGHT_OPTION_IF_TSRESOL);
 	if (ts_resolution_option == NULL)
 	{
-		lif.timestamp_resolution = 1e6;
+		lif.timestamp_resolution = 1000000;
 	}
 	else
 	{
@@ -257,6 +257,7 @@ light_pcapng_t* light_pcapng_open_append(const char* file_path)
 	light_pcapng_t* pcapng = light_pcapng_open_read(file_path, true);
 	DCHECK_NULLP(pcapng, return NULL);
 
+	light_close(pcapng->file);
 	pcapng->file = light_open(file_path, LIGHT_OAPPEND);
 
 	light_pcapng_release(pcapng->pcapng);
@@ -310,6 +311,12 @@ light_pcapng_file_info* light_create_file_info(const char* os_desc, const char* 
 
 void light_free_file_info(light_pcapng_file_info* info)
 {
+	for (size_t i = 0; i < info->interfaces_count; i++)
+	{
+		light_packet_interface lif = info->interfaces[i];
+		free(lif.name);
+		free(lif.description);
+	}
 	free(info->user_app_desc);
 	free(info->file_comment);
 	free(info->hardware_desc);
@@ -373,13 +380,14 @@ int light_get_next_packet(light_pcapng_t* pcapng, light_packet_interface* lif, l
 		packet_header->timestamp.tv_sec = ts_secs;
 		packet_header->timestamp.tv_nsec = ts_nsec;
 
-
+		packet_header->flags = 0;
 		light_option flags_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_FLAGS);
 		if (flags_opt != NULL)
 		{
 			packet_header->flags = *(uint32_t*)light_get_option_data(flags_opt);
 		}
 
+		packet_header->dropcount = 0;
 		light_option dropcount_opt = light_get_option(pcapng->pcapng, LIGHT_OPTION_EPB_DROPCOUNT);
 		if (dropcount_opt != NULL)
 		{
