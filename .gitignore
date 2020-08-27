@@ -2,7 +2,6 @@
 *.zip
 *.gch
 *.test
-*.pcapng
 *.data
 *.old
 *.a
