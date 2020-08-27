@@ -14,18 +14,26 @@ include(${CMAKE_BINARY_DIR}/conan.cmake)
 conan_cmake_run(REQUIRES zstd/1.4.0@bincrafters/stable
                 BASIC_SETUP)
 
+
+
 # Configuration
-add_definitions(-DUSE_Z_STD)
 
 include_directories("include")
 
 file(GLOB LIGHT_SOURCES src/*.c)
 
 add_library (light_pcapng SHARED ${LIGHT_SOURCES})
-target_link_libraries(light_pcapng ${CONAN_LIBS})
-
 add_library (light_pcapng_static STATIC ${LIGHT_SOURCES})
-target_link_libraries(light_pcapng_static ${CONAN_LIBS})
+
+# ZSTD
+
+option(LIGHT_USE_ZSTD "Compile with ZSTD support" ON)
+
+if(LIGHT_USE_ZSTD)
+    add_definitions(-DUSE_ZSTD)
+    target_link_libraries(light_pcapng ${CONAN_LIBS_ZSTD})
+    target_link_libraries(light_pcapng_static ${CONAN_LIBS_ZSTD})
+endif()
 
 if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 
