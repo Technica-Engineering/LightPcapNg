@@ -1,8 +1,9 @@
 .test:
-  script:
+  before_script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Debug -DLIGHT_USE_ZSTD=OFF
+  script:
+    - cmake .. -DCMAKE_BUILD_TYPE=Debug
     - cmake --build . --config Debug
     - ctest --build-config Debug --output-on-failure
 
@@ -16,3 +17,10 @@ linux:
   tags:
     - docker
   image: rikorose/gcc-cmake
+
+linux_no_zstd:
+  extends: linux
+  script:
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DLIGHT_USE_ZSTD=OFF
+    - cmake --build . --config Release
+    - ctest --build-config Release --output-on-failure
