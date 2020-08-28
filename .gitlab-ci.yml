@@ -15,6 +15,8 @@ windows:
 
 linux:
   extends: .test
+  tags:
+    - docker
   image: rikorose/gcc-cmake
   before_script:
     - pip install conan
