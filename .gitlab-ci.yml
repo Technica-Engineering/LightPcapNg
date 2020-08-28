@@ -1,6 +1,4 @@
 .test:
-  before_script:
-    - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan --force
   script:
     - mkdir build
     - cd build
@@ -12,3 +10,9 @@ windows:
   extends: .test
   tags:
     - windows
+
+linux:
+  extends: .test
+  tags:
+    - docker
+  image: rikorose/gcc-cmake
