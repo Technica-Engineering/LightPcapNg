@@ -21,4 +21,4 @@ linux:
   before_script:
     - apt update
     - apt install -y python3-pip
-    - pip install conan
+    - pip3 install conan
