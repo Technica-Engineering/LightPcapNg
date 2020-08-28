@@ -16,7 +16,3 @@ linux:
   tags:
     - docker
   image: rikorose/gcc-cmake
-  before_script:
-    - apt update
-    - apt install -y python3-pip
-    - pip3 install conan

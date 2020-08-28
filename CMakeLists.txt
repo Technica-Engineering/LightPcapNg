@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING
@@ -8,29 +8,6 @@ endif()
 
 
 project(light_pcapng C)
-
-# Get dependencies from conan
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
-                  "${CMAKE_BINARY_DIR}/conan.cmake")
-endif()
-
-include(${CMAKE_BINARY_DIR}/conan.cmake)
-
-conan_add_remote(NAME bincrafters
-	            URL https://api.bintray.com/conan/bincrafters/public-conan)
-conan_cmake_run(REQUIRES zstd/1.4.0@bincrafters/stable
-                BASIC_SETUP)
-
-find_program(DRMEMORY_FOUND "drmemory")
-if(DRMEMORY_FOUND)
-    message("drmemory found")
-    # Needed so Dr. Memory can work correctly
-    # See https://dynamorio.org/drmemory_docs/page_prep.html
-    string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-endif()
-
 
 # Configuration
 
@@ -46,9 +23,19 @@ add_library(light_pcapng_static STATIC ${LIGHT_SOURCES})
 option(LIGHT_USE_ZSTD "Compile with ZSTD support" ON)
 
 if(LIGHT_USE_ZSTD)
+    include(cmake/zstd.cmake)
     add_definitions(-DUSE_ZSTD)
-    target_link_libraries(light_pcapng ${CONAN_LIBS_ZSTD})
-    target_link_libraries(light_pcapng_static ${CONAN_LIBS_ZSTD})
+    target_link_libraries(light_pcapng libzstd_shared)
+    target_link_libraries(light_pcapng_static libzstd_static)
+endif()
+
+# Dr Memory
+
+find_program(LIGHT_DRMEMORY_PATH "drmemory" DOC "Path to Dr. Memory binary")
+if(LIGHT_DRMEMORY_PATH)
+    # Needed so Dr. Memory can work correctly
+    # See https://dynamorio.org/drmemory_docs/page_prep.html
+    string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 endif()
 
 if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
@@ -66,10 +53,10 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
             NAME ${test_name} 
             COMMAND ${test_name} "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
         )
-        if(DRMEMORY_FOUND)
+        if(LIGHT_DRMEMORY_PATH)
             add_test(
                 NAME ${test_name}_drmemory
-                COMMAND "drmemory" 
+                COMMAND "${LIGHT_DRMEMORY_PATH}"
                     "-batch"
                     "-exit_code_if_errors" "99"
                     $<TARGET_FILE:${test_name}> "${CMAKE_SOURCE_DIR}/pcaps/caneth.pcapng"
