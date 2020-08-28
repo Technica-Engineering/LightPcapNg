@@ -12,3 +12,9 @@ windows:
   extends: .test
   tags:
     - windows
+
+linux:
+  extends: .test
+  image: rikorose/gcc-cmake
+  before_script:
+    - pip install conan
