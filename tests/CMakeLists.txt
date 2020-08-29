@@ -21,7 +21,7 @@ foreach(test_file ${LIGHT_TESTS})
 
     add_test(
         NAME ${test_name} 
-        COMMAND ${test_file} ${sample_file}
+        COMMAND ${test_name} ${sample_file}
     )
     if(LIGHT_DRMEMORY_PATH)
         add_test(
