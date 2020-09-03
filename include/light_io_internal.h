@@ -1,7 +1,7 @@
-// light_util.h
-// Created on: Jul 23, 2016
+// light_file.h
+// Created on: Aug 13, 2019
 
-// Copyright (c) 2016 Radu Velea
+// Copyright (c) 2019 TMEIC Corporation - Robert Kriener
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDE_LIGHT_UTIL_H_
-#define INCLUDE_LIGHT_UTIL_H_
+#ifndef INCLUDE_LIGHT_IO_INTERNAL_H_
+#define INCLUDE_LIGHT_IO_INTERNAL_H_
 
-#define PADD32(val, aligned_val_p) do { \
-		*aligned_val_p = (val % sizeof(uint32_t)) == 0 ? val : (val / sizeof(uint32_t) + 1) * sizeof(uint32_t); \
-} while (0)
+#include "light_io.h"
+#include <stdio.h> 
 
-#endif /* INCLUDE_LIGHT_UTIL_H_ */
+typedef size_t(*light_fn_read)(void* context, void* buf, size_t count);
+typedef size_t(*light_fn_write)(void* context, const void* buf, size_t count);
+typedef int(*light_fn_seek)(void* context, long int offset, int origin);
+typedef int(*light_fn_flush)(void* context);
+typedef int(*light_fn_close)(void* context);
+
+struct light_file_t
+{
+	void* context;
+
+	light_fn_read fn_read;
+	light_fn_write fn_write;
+	light_fn_seek fn_seek;
+	light_fn_flush fn_flush;
+	light_fn_close fn_close;
+};
+
+#endif /* INCLUDE_LIGHT_IO_INTERNAL_H_ */

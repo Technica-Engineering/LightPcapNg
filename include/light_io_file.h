@@ -21,23 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDE_LIGHT_FILE_H_
-#define INCLUDE_LIGHT_FILE_H_
+#ifndef INCLUDE_LIGHT_IO_FILE_H_
+#define INCLUDE_LIGHT_IO_FILE_H_
 
-#include <stdio.h>
-#include "light_compression.h"
+#include "light_io.h"
 
-typedef _compression_t* light_compression;
-typedef _decompression_t* light_decompression;
+light_file light_io_file_open(const char* filename, const char* mode);
+light_file light_io_file_create(FILE* file);
 
-typedef struct light_file_t
-{
-	FILE* file;
-	light_compression compression_context;
-	light_decompression decompression_context;
-
-} light_file_t;
-
-typedef light_file_t* light_file;
-
-#endif /* INCLUDE_LIGHT_FILE_H_ */
+#endif /* INCLUDE_LIGHT_IO_FILE_H_ */

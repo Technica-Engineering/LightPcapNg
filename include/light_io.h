@@ -1,7 +1,7 @@
-// test_read.c
-// Created on: Jul 23, 2016
+// light_file.h
+// Created on: Aug 13, 2019
 
-// Copyright (c) 2016 Radu Velea
+// Copyright (c) 2019 TMEIC Corporation - Robert Kriener
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "light_pcapng.h"
+#ifndef INCLUDE_LIGHT_IO_H_
+#define INCLUDE_LIGHT_IO_H_
 
 #include <stdio.h>
-#include <stdlib.h>
 
-int main(int argc, const char **args) {
-	int i;
+typedef struct light_file_t* light_file;
 
-	for (i = 1; i < argc; ++i) {
-		const char *file = args[i];
-		light_pcapng pcapng = light_read_from_path(file);
-		if (pcapng != NULL) {
-			char *data = light_pcapng_to_string(pcapng);
-			printf("Data for %s\n%s\n", file, data);
-			light_pcapng_release(pcapng);
-			free(data);
-		}
-		else {
-			fprintf(stderr, "Unable to read pcapng: %s\n", file);
-		}
-	}
+light_file light_io_open(const char* file_name, const char* mode);
 
-	return 0;
-}
+size_t light_io_read(light_file fd, void* buf, size_t count);
+size_t light_io_write(light_file fd, const void* buf, size_t count);
+
+int light_io_seek(light_file fd, long int offset, int origin);
+int light_io_flush(light_file fd);
+int light_io_close(light_file fd);
+
+#endif /* INCLUDE_LIGHT_IO_H_ */

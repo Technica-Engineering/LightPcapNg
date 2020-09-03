@@ -38,16 +38,6 @@ extern "C" {
 
 // XXX: Warning: I should not use these macros with functions!!! Undefined for Release.
 
-#define DCHECK_INT(x, y)	do { \
-		int x_ret = (int)(x); \
-		int y_ret = (int)(y); \
-		if (x_ret <= y_ret) { \
-			fprintf(stderr, "ERROR at %s::%s::%d: %d <= %d\n", \
-					__FILE__, __FUNCTION__, __LINE__, x_ret, y_ret); \
-			__light_stop; \
-		} \
-	} while (0)
-
 #define DCHECK_ASSERT(x, y)	do { \
 		int x_ret = (int)(x); \
 		int y_ret = (int)(y); \

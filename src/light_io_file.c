@@ -1,4 +1,4 @@
-// light_types.h
+// light_io.c
 // Created on: Jul 23, 2016
 
 // Copyright (c) 2016 Radu Velea
@@ -21,15 +21,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDE_LIGHT_TYPES_H_
-#define INCLUDE_LIGHT_TYPES_H_
+#include "light_io_file.h"
+#include "light_io_internal.h"
+#include <stdio.h>
+#include <stdlib.h> 
 
-typedef enum {
-	LIGHT_INFO_TYPE = 0,
-	LIGHT_INFO_LENGTH = 1,
-	LIGHT_INFO_BODY = 2,
-	LIGHT_INFO_OPTIONS = 3,
-	LIGHT_INFO_MAX = 4,
-} light_info;
+size_t light_file_read(void* context, void* buf, size_t count)
+{
+	FILE* file = context;
+	return fread(buf, 1, count, file);
+}
 
-#endif /* INCLUDE_LIGHT_TYPES_H_ */
+size_t light_file_write(void* context, const void* buf, size_t count)
+{
+	FILE* file = context;
+	return fwrite(buf, 1, count, file);
+}
+
+int light_file_seek(void* context, long int offset, int origin)
+{
+	FILE* file = context;
+	return fseek(file, offset, origin);
+}
+
+int light_file_flush(void* context)
+{
+	FILE* file = context;
+	return fflush(file);
+}
+
+int light_file_close(void* context)
+{
+	FILE* file = context;
+	return fclose(file);
+}
+
+light_file light_io_file_open(const char* filename, const char* mode)
+{
+	FILE* file = fopen(filename, mode);
+	return light_io_file_create(file);
+}
+
+light_file light_io_file_create(FILE* file)
+{
+	if (!file)
+	{
+		return NULL;
+	}
+	light_file fd = calloc(1, sizeof(struct light_file_t));
+	fd->context = file;
+	fd->fn_read = &light_file_read;
+	fd->fn_write = &light_file_write;
+	fd->fn_flush = &light_file_flush;
+	fd->fn_close = &light_file_close;
+	return fd;
+}

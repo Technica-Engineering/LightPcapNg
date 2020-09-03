@@ -9,3 +9,5 @@
 *.cap
 *.ntar
 *.log
+
+*.tmp

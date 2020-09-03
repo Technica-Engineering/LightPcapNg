@@ -31,10 +31,6 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef NULL
-#define NULL   ((void *) 0)
-#endif
-
 struct _light_section_header {
 	uint32_t byteorder_magic;
 	uint16_t major_version;
@@ -58,12 +54,6 @@ struct _light_enhanced_packet_block {
 
 struct _light_simple_packet_block {
 	uint32_t original_packet_length;
-	uint32_t packet_data[0];
-};
-
-struct _light_custom_nonstandard_block {
-	uint32_t data_length;
-	uint32_t reserved0, reserved1;
 	uint32_t packet_data[0];
 };
 
