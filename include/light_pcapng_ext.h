@@ -28,8 +28,7 @@
 extern "C" {
 #endif
 
-#include "light_types.h"
-
+#include "light_io.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -39,21 +38,10 @@ extern "C" {
 #include <sys/time.h>
 #endif
 
-#define MAX_SUPPORTED_INTERFACE_BLOCKS 64
+struct light_pcapng_t;
+typedef struct light_pcapng_t* light_pcapng;
 
-struct _light_pcapng_t;
-typedef struct _light_pcapng_t light_pcapng_t;
-
-typedef struct _light_packet_header {
-	struct timespec timestamp;
-	uint32_t captured_length;
-	uint32_t original_length;
-	char* comment;
-	uint32_t flags;
-	uint64_t dropcount;
-} light_packet_header;
-
-typedef struct _light_interface {
+typedef struct light_packet_interface {
 	uint16_t link_type;
 	char* name;
 	char* description;
@@ -61,43 +49,47 @@ typedef struct _light_interface {
 
 } light_packet_interface;
 
-typedef struct _light_pcapng_file_info {
+typedef struct light_packet_header {
+	struct timespec timestamp;
+	uint32_t captured_length;
+	uint32_t original_length;
+
+	char* comment;
+	uint32_t flags;
+	uint64_t dropcount;
+
+} light_packet_header;
+
+typedef struct light_file_info {
 	uint16_t major_version;
 	uint16_t minor_version;
 
-	char *file_comment;
+	char *comment;
 	char *hardware_desc;
 	char *os_desc;
+	char *app_desc;
 
-	char *user_app_desc;
-	
-	light_packet_interface interfaces[MAX_SUPPORTED_INTERFACE_BLOCKS];
-	size_t interfaces_count;
 } light_pcapng_file_info;
 
 
-light_pcapng_t *light_pcapng_open_read(const char* file_path, bool read_all_interfaces);
-
-//Set compression level to 0 to disable compression!
-light_pcapng_t *light_pcapng_open_write(const char* file_path, light_pcapng_file_info *file_info, int compression_level);
-
-light_pcapng_t *light_pcapng_open_append(const char* file_path);
+light_pcapng light_pcapng_open(const char* file_path, const char* mode);
+light_pcapng light_pcapng_create(light_file file, const char* mode, light_pcapng_file_info* info);
 
 light_pcapng_file_info *light_create_default_file_info();
 
-light_pcapng_file_info *light_create_file_info(const char *os_desc, const char *hardware_desc, const char *user_app_desc, const char *file_comment);
+light_pcapng_file_info *light_create_file_info(const char *os_desc, const char *hardware_desc, const char *app_desc, const char *comment);
 
 void light_free_file_info(light_pcapng_file_info *info);
 
-light_pcapng_file_info *light_pcang_get_file_info(light_pcapng_t *pcapng);
+light_pcapng_file_info *light_pcang_get_file_info(light_pcapng pcapng);
 
-int light_get_next_packet(light_pcapng_t *pcapng, light_packet_interface* lif, light_packet_header *packet_header, const uint8_t **packet_data);
+int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interface, light_packet_header *packet_header, const uint8_t **packet_data);
 
-void light_write_packet(light_pcapng_t *pcapng, const light_packet_interface* lif, const light_packet_header *packet_header, const uint8_t *packet_data);
+int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header *packet_header, const uint8_t *packet_data);
 
-void light_pcapng_close(light_pcapng_t *pcapng);
+int light_pcapng_close(light_pcapng pcapng);
 
-void light_pcapng_flush(light_pcapng_t *pcapng);
+int light_pcapng_flush(light_pcapng pcapng);
 
 #ifdef __cplusplus
 }

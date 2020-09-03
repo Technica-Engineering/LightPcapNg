@@ -29,37 +29,30 @@ extern "C" {
 #endif
 
 #include "light_special.h"
-#include "light_types.h"
-#include "light_platform.h"
+#include "light_io.h"
+#include <stdbool.h>
+
+	// block types
 
 #define LIGHT_SECTION_HEADER_BLOCK  0x0A0D0D0A
 #define LIGHT_INTERFACE_BLOCK       0x00000001
 #define LIGHT_ENHANCED_PACKET_BLOCK 0x00000006
 #define LIGHT_SIMPLE_PACKET_BLOCK   0x00000003
 
-#define LIGHT_CUSTOM_DATA_BLOCK     0xB16B00B5
-#define LIGHT_UNKNOWN_DATA_BLOCK    0xDEADBEEF
+// option codes
 
-// "Official" option codes
-#define LIGHT_OPTION_IF_TSRESOL            0x0009
-#define LIGHT_OPTION_COMMENT               0x0001
-#define LIGHT_OPTION_SHB_HARDWARE          0x0002
-#define LIGHT_OPTION_SHB_OS                0x0003
-#define LIGHT_OPTION_SHB_USERAPP           0x0004
-#define LIGHT_OPTION_IF_TSRESOL            0x0009
+#define LIGHT_OPTION_COMMENT               1
+#define LIGHT_OPTION_SHB_HARDWARE          2
+#define LIGHT_OPTION_SHB_OS                3
+#define LIGHT_OPTION_SHB_APP               4
+#define LIGHT_OPTION_IF_TSRESOL            9
 
-#define LIGHT_OPTION_EPB_FLAGS             0x0002
-#define LIGHT_OPTION_EPB_DROPCOUNT         0x0004
-
-// Custom option codes
-#define LIGHT_CUSTOM_OPTION_ADDRESS_INFO   0xADD4
-#define LIGHT_CUSTOM_OPTION_FEATURE_U64    0x0064
+#define LIGHT_OPTION_EPB_FLAGS             2
+#define LIGHT_OPTION_EPB_DROPCOUNT         4
 
 #define BYTE_ORDER_MAGIC            0x1A2B3C4D
 
-#define LIGHT_KEY_REJECTED          0xFFFFFFFF
-
-/////////////////////////////// /////////// ERROR CODES //////////////////////////////////////////////
+// error codes
 
 #define LIGHT_SUCCESS           0
 #define LIGHT_INVALID_SECTION  -1
@@ -67,61 +60,48 @@ extern "C" {
 #define LIGHT_INVALID_ARGUMENT -3
 #define LIGHT_FAILURE          -5
 
-/////////////////////////////// STANDARD PCAPNG STRUCTURES & FUNCTIONS ///////////////////////////////
+// pcapng structures
 
-typedef struct _light_pcapng *light_pcapng;
-typedef struct _light_option *light_option;
+	struct light_block_t {
+		uint32_t type;
+		uint32_t total_length;
+		uint32_t* body;
+		struct light_option_t* options;
+	};
 
-// Read/Write Functions
-light_pcapng light_read_from_path(const char *file_name);
-light_pcapng light_read_from_memory(const uint32_t *memory, size_t size);
-//Favor light_pcapng_to_file_stream over this function
-uint32_t *light_pcapng_to_memory(const light_pcapng pcapng, size_t *size);
+	struct light_option_t {
+		uint16_t code;
+		uint16_t length;
+		uint32_t* data;
+		struct light_option_t* next_option;
+	};
 
-size_t light_pcapng_to_file_stream(const light_pcapng pcapng, light_file file);
+	typedef struct light_block_t* light_block;
+	typedef struct light_option_t* light_option;
 
-int light_pcapng_to_file(const char *file_name, const light_pcapng pcapng);
-int light_pcapng_to_compressed_file(const char *file_name, const light_pcapng pcapng, int compression_level);
 
-//Read next record out of file, if you give an existing record I will free it for you
-//The returned record must be freed by either YOU or the next call to light_read_record!
-void light_read_record(light_file fd, light_pcapng *record);
+	// block functions
 
-void light_pcapng_release(light_pcapng pcapng);
+	// Read next record out of file, if you give an existing record I will free it for you
+	// The returned record must be freed by either YOU or the next call to light_free_block!
+	void light_read_block(light_file fd, light_block* block);
 
-// For Debugging Purposes
-char *light_pcapng_to_string(light_pcapng pcapng);
-uint32_t light_get_block_count(const light_pcapng pcapng);
-light_pcapng light_get_block(const light_pcapng pcapng, uint32_t index);
-size_t light_get_size(const light_pcapng pcapng);
-int light_get_block_info(const light_pcapng pcapng, light_info info_flag, void *info_data, size_t *data_size);
-light_option light_get_option(const light_pcapng pcapng, uint16_t option_code);
-uint16_t light_get_option_code(const light_option option);
-const light_option light_get_next_option(const light_option option);
-uint32_t *light_get_option_data(const light_option option);
-uint16_t light_get_option_length(const light_option option);
+	light_block light_create_block(uint32_t type, const uint32_t* body, uint32_t body_length);
 
-// Manipulation Functions
-light_option light_create_option(const uint16_t option_code, const uint16_t option_length, const void *option_value);
-int light_add_option(light_pcapng section, light_pcapng pcapng, light_option option, bool copy);
-int light_update_option(light_pcapng section, light_pcapng pcapng, light_option option);
-int light_add_block(light_pcapng block, light_pcapng next_block);
-int light_subcapture(const light_pcapng section, bool (*predicate)(const light_pcapng), light_pcapng *subcapture);
-int light_iterate(const light_pcapng pcapng, bool (*stop_fn)(const light_pcapng, void *), void *args);
+	void light_free_block(light_block pcapng);
 
-// Allocation and free functions
-light_option light_alloc_option(uint16_t option_length);
-light_pcapng light_alloc_block(uint32_t block_type, const uint32_t *block_body, uint32_t block_body_length);
-void light_free_option(light_option option);
-void light_free_block(light_pcapng pcapng);
+	size_t light_write_block(light_file file, const light_block block);
 
-/////////////////////////////// CONTINUOUS MEMORY BLOCK STRUCTURES & FUNCTIONS ///////////////////////////////
+	// option functions
 
-typedef struct _light_pcapng_mem *light_pcapng_mem;
+	light_option light_create_option(const uint16_t option_code, const uint16_t option_length, const void* option_value);
+	void light_free_option(light_option option);
 
-// Continuous Memory Functions
-struct _light_pcapng_mem *light_no_copy_from_memory(uint32_t *memory, size_t size, int is_owner);
-void light_pcapng_mem_release(struct _light_pcapng_mem *pcapng);
+	light_option light_find_option(const light_block block, uint16_t option_code);
+
+	int light_add_option(light_block section, light_block block, light_option option, bool copy);
+	int light_update_option(light_block section, light_block block, light_option option);
+
 
 #ifdef __cplusplus
 }

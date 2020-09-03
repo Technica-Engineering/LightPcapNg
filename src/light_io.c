@@ -21,62 +21,80 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "light_debug.h"
-#include "light_internal.h"
-#include "light_pcapng.h"
-#include "light_platform.h"
+#include "light_io.h"
+#include "light_io_internal.h"
+#include "light_io_file.h"
+#include "light_io_zstd.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
-light_pcapng light_read_from_path(const char* file_name)
+#if _WIN32
+// https://stackoverflow.com/a/5820836
+#define strcasecmp _stricmp
+#endif
+
+const char* get_filename_ext(const char* filename) {
+	const char* dot = strrchr(filename, '.');
+	if (!dot || dot == filename) {
+		return "";
+	}
+	return dot;
+}
+
+light_file light_io_open(const char* filename, const char* mode)
 {
-	light_pcapng head;
-	uint32_t* memory;
-	size_t size = 0;
-	light_file fd = light_open(file_name, LIGHT_OREAD);
-
-	if (fd == NULL) {
+	if (!filename) {
 		return NULL;
 	}
+	const char* ext = get_filename_ext(filename);
 
-	size = light_size(fd);
-	DCHECK_INT(size, 0);
+#if defined(USE_ZSTD)
+	if (strcasecmp(ext, ".zst") == 0) {
+		return light_io_zstd_open(filename, mode);
+	}
+#endif
 
-	memory = calloc(size, 1);
-
-	DCHECK_INT(light_read(fd, memory, size), size - 1);
-
-	head = light_read_from_memory(memory, size);
-
-	light_close(fd);
-	free(memory);
-
-	return head;
+	return light_io_file_open(filename, mode);
 }
 
-int light_pcapng_to_file(const char* file_name, const light_pcapng pcapng)
+size_t light_io_read(light_file fd, void* buf, size_t count)
 {
-	light_file fd = light_open(file_name, LIGHT_OWRITE);
-	size_t written = 0;
-	if (fd)
-	{
-		written = light_pcapng_to_file_stream(pcapng, fd);
-		light_close(fd);
+	if (fd->fn_read == NULL) {
+		return 0;
 	}
-	return written > 0 ? LIGHT_SUCCESS : LIGHT_FAILURE;
+	return fd->fn_read(fd->context, buf, count);
 }
 
-int light_pcapng_to_compressed_file(const char* file_name, const light_pcapng pcapng, int compression_level)
+size_t light_io_write(light_file fd, const void* buf, size_t count)
 {
-	light_file fd = light_open_compression(file_name, LIGHT_OWRITE, compression_level);
-	size_t written = 0;
-
-	if (fd)
-	{
-		written = light_pcapng_to_file_stream(pcapng, fd);
-		light_close(fd);
+	if (fd->fn_write == NULL) {
+		return 0;
 	}
+	return fd->fn_write(fd->context, buf, count);
+}
 
-	return written > 0 ? LIGHT_SUCCESS : LIGHT_FAILURE;
+int light_io_seek(light_file fd, long int offset, int origin)
+{
+	if (fd->fn_seek == NULL) {
+		return -1;
+	}
+	return fd->fn_seek(fd->context, offset, origin);
+}
+
+int light_io_flush(light_file fd)
+{
+	if (fd->fn_flush == NULL) {
+		return 0;
+	}
+	return fd->fn_flush(fd->context);
+}
+
+int light_io_close(light_file fd)
+{
+	int res = fd->fn_close(fd->context);
+	free(fd);
+	return res;
 }

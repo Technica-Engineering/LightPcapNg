@@ -1,7 +1,4 @@
-// light_compression.h
-// Created on: Aug 16, 2019
-
-// Copyright (c) 2019 TMEIC Corporation - Robert Kriener
+// Copyright (c) 2016 Radu Velea
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,28 +18,62 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDE_LIGHT_COMPRESSION_FUNCTIONS_H_
-#define INCLUDE_LIGHT_COMPRESSION_FUNCTIONS_H_
+#include "light_io_mem.h"
 
+#include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "_util.h"
 
-struct light_file_t;
+int read_file(const char* file, uint8_t** data, size_t* size)
+{
+	size_t tmp;
+	struct stat info;
+	FILE* f;
 
-extern _compression_t * (*get_compression_context_ptr)(int);
-extern void(*free_compression_context_ptr)(_compression_t*);
-extern _decompression_t * (*get_decompression_context_ptr)();
-extern void(*free_decompression_context_ptr)(_decompression_t*);
-extern int(*is_compressed_file)(const char*);
-extern size_t(*read_compressed)(struct light_file_t *, void *, size_t);
-extern size_t(*write_compressed)(struct light_file_t *, const void *, size_t);
-extern int(*close_compressed)(struct light_file_t *);
+	f = fopen(file, "rb");
+	stat(file, &info);
+	*data = calloc(info.st_size, 1);
+	tmp = fread(*data, 1, info.st_size, f);
+	if (tmp != info.st_size) {
+		free(*data);
+		fclose(f);
+		return -1;
+	}
 
-#ifdef __cplusplus
+	fclose(f);
+	*size = info.st_size;
+	return 0;
 }
-#endif
 
-#endif /* INCLUDE_LIGHT_COMPRESSION_FUNCTIONS_H_ */
+int main(int argc, const char** args) {
+	if (argc != 2) {
+		fprintf(stderr, "Usage %s [infile]", args[0]);
+		return 1;
+	}
+
+	const char* infile = args[1];
+	uint8_t* data;
+	size_t size;
+	if (read_file(infile, &data, &size) != 0) {
+		fprintf(stderr, "Unable to read pcapng: %s\n", infile);
+		return 1;
+	}
+
+	light_file mem = light_io_mem_create(data, size);
+	light_file file = light_io_open(infile, "rb");
+
+	int res = light_file_diff(mem, file, stderr);
+
+	light_io_close(mem);
+	free(data);
+	light_io_close(file);
+
+	return res;
+}
+

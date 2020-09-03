@@ -1,4 +1,4 @@
-// light_null_compression.c
+// light_zstd_compression.h
 // Created on: Aug 13, 2019
 
 // Copyright (c) 2019 TMEIC Corporation - Robert Kriener
@@ -21,21 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "light_compression.h"
-#include "light_null_compression.h"
-#include "light_compression_functions.h"
-#include "light_file.h"
+#ifndef INCLUDE_LIGHT_IO_ZSTD_H_
+#define INCLUDE_LIGHT_IO_ZSTD_H_
 
+#if defined(USE_ZSTD)
 
-#if defined(USE_NULL_COMPRESSION)
+#include "light_io.h"
 
-_compression_t * (*get_compression_context_ptr)(int) = NULL;
-void(*free_compression_context_ptr)(_compression_t*) = NULL;
-_decompression_t * (*get_decompression_context_ptr)() = NULL;
-void(*free_decompression_context_ptr)(_decompression_t*) = NULL;
-int(*is_compressed_file)(const char*) = NULL;
-size_t(*read_compressed)(struct light_file_t *, void *, size_t) = NULL;
-size_t(*write_compressed)(struct light_file_t *, const void *, size_t) = NULL;
-int(*close_compressed)(struct light_file_t *) = NULL;
+light_file light_io_zstd_open(const char* filename, const char* mode);
 
-#endif
+#endif // USE_ZSTD
+
+#endif // INCLUDE_LIGHT_IO_ZSTD_H_

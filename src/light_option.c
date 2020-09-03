@@ -23,10 +23,7 @@
 
 #include "light_pcapng.h"
 
-#include "light_debug.h"
-#include "light_internal.h"
-
-light_option light_get_option(const light_pcapng pcapng, uint16_t option_code)
+light_option light_find_option(const light_block pcapng, uint16_t option_code)
 {
 	if (pcapng == NULL) {
 		return NULL;
@@ -35,7 +32,7 @@ light_option light_get_option(const light_pcapng pcapng, uint16_t option_code)
 	light_option iterator = pcapng->options;
 
 	while (iterator != NULL) {
-		if (iterator->custom_option_code == option_code) {
+		if (iterator->code == option_code) {
 			break;
 		}
 		iterator = iterator->next_option;
@@ -43,24 +40,3 @@ light_option light_get_option(const light_pcapng pcapng, uint16_t option_code)
 
 	return iterator;
 }
-
-uint16_t light_get_option_code(const light_option option)
-{
-	return option->custom_option_code;
-}
-
-const light_option light_get_next_option(const light_option option)
-{
-	return option->next_option;
-}
-
-uint32_t *light_get_option_data(const light_option option)
-{
-	return option->data;
-}
-
-uint16_t light_get_option_length(const light_option option)
-{
-	return option->option_length;
-}
-

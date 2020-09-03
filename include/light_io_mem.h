@@ -1,4 +1,4 @@
-// light_null_compression.h
+// light_file.h
 // Created on: Aug 13, 2019
 
 // Copyright (c) 2019 TMEIC Corporation - Robert Kriener
@@ -21,18 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef INCLUDE_LIGHT_NULL_COMPRESSION_H_
-#define INCLUDE_LIGHT_NULL_COMPRESSION_H_
+#ifndef INCLUDE_LIGHT_IO_MEM_H_
+#define INCLUDE_LIGHT_IO_MEM_H_
 
-#if defined(USE_NULL_COMPRESSION)
+#include "light_io.h"
+#include <stdio.h>
 
-#include <stdlib.h>
+light_file light_io_mem_create(void* memory, size_t size);
 
-typedef void _compression_t;
-typedef void _decompression_t;
-
-struct light_file_t;
-
-#endif
-
-#endif /* INCLUDE_LIGHT_NULL_COMPRESSION_H_ */
+#endif // INCLUDE_LIGHT_IO_MEM_H_

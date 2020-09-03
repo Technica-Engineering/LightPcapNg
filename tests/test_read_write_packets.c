@@ -1,6 +1,3 @@
-// test_read_write_packets.c
-// Created on: Nov 14, 2016
-
 // Copyright (c) 2016
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -49,27 +46,26 @@ int main(int argc, const char **args) {
 
 	for (i = 1; i < argc; ++i) {
 		const char *file = args[i];
-		light_pcapng_t *pcapng_read = light_pcapng_open_read(file, false);
+		light_pcapng pcapng_read = light_pcapng_open(file, "rb");
 		if (pcapng_read != NULL) {
 			const char* file_append = "output_append.pcapng";
 			copy_file(file, file_append);
 
 			light_pcapng_file_info *info = light_pcang_get_file_info(pcapng_read);
 			printf("file version is %d.%d\n", info->major_version, info->minor_version);
-			if (info->file_comment != NULL)
-				printf("file comment is: %s\n", info->file_comment);
+			if (info->comment != NULL)
+				printf("file comment is: %s\n", info->comment);
 			if (info->os_desc != NULL)
 				printf("os is: %s\n", info->os_desc);
 			if (info->hardware_desc != NULL)
 				printf("hardware description is: %s\n", info->hardware_desc);
-			if (info->user_app_desc != NULL)
-				printf("user app is: %s\n", info->user_app_desc);
+			if (info->app_desc != NULL)
+				printf("user app is: %s\n", info->app_desc);
 
 			const char *file_write = "output.pcapng";
-			light_pcapng_t *pcapng_write = light_pcapng_open_write(file_write, light_create_default_file_info(), 0);
+			light_pcapng pcapng_write = light_pcapng_open(file_write, "wb");
+			light_pcapng pcapng_append = light_pcapng_open(file_append, "ab");
 
-			light_pcapng_t *pcapng_append = light_pcapng_open_append(file_append);
-			//light_pcapng_t *pcapng_write = light_pcapng_open_write(file_write, info);
 			if (pcapng_write == NULL)
 			{
 				printf("Error occurred in opening write file\n");
@@ -90,7 +86,7 @@ int main(int argc, const char **args) {
 				const uint8_t *pkt_data = NULL;
 				int res = 0;
 
-				res = light_get_next_packet(pcapng_read, &pkt_interface, &pkt_header, &pkt_data);
+				res = light_read_packet(pcapng_read, &pkt_interface, &pkt_header, &pkt_data);
 				if (!res)
 					break;
 
@@ -114,8 +110,6 @@ int main(int argc, const char **args) {
 					index++;
 				}
 			}
-
-			printf("interface count in file: %zu\n", info->interfaces_count);
 
 			light_pcapng_close(pcapng_read);
 			light_pcapng_close(pcapng_write);

@@ -22,48 +22,28 @@
 // SOFTWARE.
 
 #include "light_pcapng.h"
-
-#include "light_internal.h"
 #include "light_util.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-light_option light_alloc_option(uint16_t option_length)
+light_block light_create_block(uint32_t type, const uint32_t* body, uint32_t body_length)
 {
-	struct _light_option *option = calloc(1, sizeof(struct _light_option));
-	uint16_t actual_size = 0;
-
-	option->option_length = option_length;
-
-	PADD32(option_length, &actual_size);
-	if (actual_size != 0) {
-		option->data = calloc(1, actual_size);
-	}
-
-	return option;
-}
-
-light_pcapng light_alloc_block(uint32_t block_type, const uint32_t *block_body, uint32_t block_body_length)
-{
-	struct _light_pcapng *pcapng_block = calloc(1, sizeof(struct _light_pcapng));
+	light_block pcapng_block = calloc(1, sizeof(struct light_block_t));
 	uint32_t actual_size = 0;
-	int32_t block_body_size;
+	int32_t body_size;
 
-	pcapng_block->block_type = block_type;
+	pcapng_block->type = type;
 
-	PADD32(block_body_length, &actual_size);
+	PADD32(body_length, &actual_size);
 
-	pcapng_block->block_total_length = actual_size; // This value MUST be a multiple of 4.
-	block_body_size = actual_size - 2 * sizeof(pcapng_block->block_total_length) - sizeof(pcapng_block->block_type);
+	pcapng_block->total_length = actual_size; // This value MUST be a multiple of 4.
+	body_size = actual_size - 2 * sizeof(pcapng_block->total_length) - sizeof(pcapng_block->type);
 
-	if (block_body_size > 0) {
-		pcapng_block->block_body = calloc(1, block_body_size);
-		memcpy(pcapng_block->block_body, block_body, block_body_size);
+	if (body_size > 0) {
+		pcapng_block->body = calloc(1, body_size);
+		memcpy(pcapng_block->body, body, body_size);
 	}
-
-	pcapng_block->next_block = NULL;
-	pcapng_block->options = NULL;
 
 	return pcapng_block;
 }
@@ -73,11 +53,3 @@ void light_free_option(light_option option)
 	free(option->data);
 	free(option);
 }
-
-void light_free_block(light_pcapng pcapng)
-{
-	free(pcapng->block_body);
-	free(pcapng);
-}
-
-
