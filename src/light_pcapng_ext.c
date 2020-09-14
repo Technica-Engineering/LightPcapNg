@@ -391,6 +391,13 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 	return 1;
 }
 
+int safe_strcmp(char const* str1, char const* str2) {
+	if (!str1 || !str2) {
+		return str1 - str2;
+	}
+	return strcmp(str1, str2);
+}
+
 static const uint8_t NSEC_PRECISION = 9;
 
 int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header* packet_header, const uint8_t* packet_data)
@@ -403,16 +410,14 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 		return LIGHT_INVALID_ARGUMENT;
 	}
 
-	return 0;
-
 	size_t iface_id = pcapng->section_interface_offset;
 	for (; iface_id < pcapng->interfaces_count; iface_id++)
 	{
 		light_packet_interface iface = pcapng->interfaces[iface_id];
 		bool match = true;
 		match = match && iface.link_type == packet_interface->link_type;
-		match = match && strcmp(iface.name, packet_interface->name) == 0;
-		match = match && strcmp(iface.description, packet_interface->description) == 0;
+		match = match && safe_strcmp(iface.name, packet_interface->name) == 0;
+		match = match && safe_strcmp(iface.description, packet_interface->description) == 0;
 		match = match && iface.timestamp_resolution == packet_interface->timestamp_resolution;
 		if (match) {
 			break;

@@ -94,6 +94,9 @@ int light_io_flush(light_file fd)
 
 int light_io_close(light_file fd)
 {
+	if (fd == NULL) {
+		return 0;
+	}
 	int res = fd->fn_close(fd->context);
 	free(fd);
 	return res;

@@ -40,7 +40,14 @@ endforeach()
 add_test(
     NAME "blocks.merge.merge"
     COMMAND test_blocks_merge 
-        "${CMAKE_CURRENT_LIST_DIR}/results/blocks.mergecap.pcapng" 
+        "${CMAKE_CURRENT_LIST_DIR}/results/blocks.merged.pcapng" 
+        ${samples_pcapng}
+)
+
+add_test(
+    NAME "packets.merge.merge"
+    COMMAND test_packets_merge 
+        "${CMAKE_CURRENT_LIST_DIR}/results/packets.merged.pcapng" 
         ${samples_pcapng}
 )
 

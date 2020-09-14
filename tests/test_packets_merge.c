@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Radu Velea
+// Copyright (c) 2016
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,14 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "light_pcapng.h"
-#include "light_io_file.h"
+#include "light_pcapng_ext.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+
+void copy_file(const char* src_path, const char* dst_path) {
+	FILE* src_fd = fopen(src_path, "rb");
+	FILE* dst_fd = fopen(dst_path, "wb");
+	size_t n, m;
+	unsigned char buff[8192];
+	do {
+		n = fread(buff, 1, 8192, src_fd);
+		if (n)
+			m = fwrite(buff, 1, n, dst_fd);
+		else
+			m = 0;
+	} while ((n > 0) && (n == m));
+
+	fflush(dst_fd);
+	fclose(src_fd);
+	fclose(dst_fd);
+}
 
 int main(int argc, const char** args) {
 	if (argc < 3) {
@@ -34,28 +48,35 @@ int main(int argc, const char** args) {
 	}
 
 	const char* outfile = args[1];
-	light_file writer = light_io_open(outfile, "wb");
+	light_pcapng writer = light_pcapng_open(outfile, "wb");
 
-	for (int i = 2; i < argc; i++)
-	{
+	for (int i = 2; i < argc; ++i) {
+
 		const char* infile = args[i];
-		light_file reader = light_io_open(infile, "rb");
+		light_pcapng reader = light_pcapng_open(infile, "rb");
 		if (reader == NULL)
 		{
-			light_io_close(writer);
+			light_pcapng_close(writer);
 			fprintf(stderr, "Unable to read pcapng: %s\n", infile);
 			return 1;
 		}
-		light_block block = NULL;
-		light_read_block(reader, &block);
-		while (block != NULL)
-		{
-			light_write_block(writer, block);
-			light_read_block(reader, &block);
-		}
-		light_io_close(reader);
-	}
 
-	light_io_close(writer);
+		while (1) {
+			light_packet_interface pkt_interface;
+			light_packet_header pkt_header;
+			const uint8_t* pkt_data = NULL;
+			int res = 0;
+
+			res = light_read_packet(reader, &pkt_interface, &pkt_header, &pkt_data);
+			if (!res || pkt_data == NULL) {
+				break;
+			}
+
+			light_write_packet(writer, &pkt_interface, &pkt_header, pkt_data);
+		}
+
+		light_pcapng_close(reader);
+	}
+	light_pcapng_close(writer);
 	return 0;
 }
