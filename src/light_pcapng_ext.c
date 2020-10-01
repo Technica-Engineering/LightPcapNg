@@ -400,6 +400,16 @@ int safe_strcmp(char const* str1, char const* str2) {
 
 static const uint8_t NSEC_PRECISION = 9;
 
+uint8_t get_timestamp_resolution_precision(uint64_t timestamp_resolution) {
+	uint64_t time_value = timestamp_resolution;
+	uint8_t precision = 0;
+	while (time_value > 1) {
+		time_value = time_value / 10;
+		precision = precision + 1;
+	}
+	return precision;
+}
+
 int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header* packet_header, const uint8_t* packet_data)
 {
 	DCHECK_NULLP(pcapng, return LIGHT_INVALID_ARGUMENT);
@@ -432,10 +442,25 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 
 		light_block iface_block_pcapng = light_create_block(LIGHT_INTERFACE_BLOCK, (const uint32_t*)&interface_block, sizeof(struct _light_interface_description_block) + 3 * sizeof(uint32_t));
 
-		// let all written packets has a timestamp resolution in nsec - this way we will not loose the precision;
-		// when a possibility to write interface blocks is added, the precision should be taken from them
-		light_option resolution_option = light_create_option(LIGHT_OPTION_IF_TSRESOL, sizeof(NSEC_PRECISION), (uint8_t*)&NSEC_PRECISION);
+		// get precision from timestamp resolution (number of 0s)
+		uint8_t timestamp_precision = get_timestamp_resolution_precision(packet_interface->timestamp_resolution);
+		// add precision to options
+		light_option resolution_option = light_create_option(LIGHT_OPTION_IF_TSRESOL, sizeof(timestamp_precision), (uint8_t*)&timestamp_precision);
 		light_add_option(NULL, iface_block_pcapng, resolution_option, false);
+
+		// if packet interface has a name, add it to the light options
+		if (packet_interface->name)
+		{
+			light_option name_option = light_create_option(2, sizeof(packet_interface->name) + 1, packet_interface->name);
+			light_add_option(NULL, iface_block_pcapng, name_option, false);
+		}
+
+		// if packet interface has a description, add it to the light options
+		if (packet_interface->description)
+		{
+			light_option description_option = light_create_option(3, sizeof(packet_interface->description) + 1, packet_interface->description);
+			light_add_option(NULL, iface_block_pcapng, description_option, false);
+		}
 
 		__append_interface_block(pcapng, iface_block_pcapng);
 		light_write_block(pcapng->file, iface_block_pcapng);
