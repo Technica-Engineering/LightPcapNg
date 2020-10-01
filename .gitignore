@@ -11,3 +11,5 @@
 *.log
 
 *.tmp
+/.vs
+/out
