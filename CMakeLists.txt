@@ -23,12 +23,13 @@ endif()
 
 # Configuration
 
-include_directories("include")
-
 file(GLOB LIGHT_SOURCES src/*.c)
 
 add_library(light_pcapng SHARED ${LIGHT_SOURCES})
 add_library(light_pcapng_static STATIC ${LIGHT_SOURCES})
+
+target_include_directories(light_pcapng PUBLIC "include")
+target_include_directories(light_pcapng_static PUBLIC "include")
 
 # ZSTD
 
