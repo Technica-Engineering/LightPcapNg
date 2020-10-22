@@ -1,3 +1,6 @@
+![](https://img.shields.io/github/workflow/status/Technica-Engineering/LightPcapNg/CMake)
+![](https://img.shields.io/github/license/Technica-Engineering/LightPcapNg)
+
 # LightPcapNg
 
 Library for general-purpose tracing based on [PCAPNG](https://pcapng.github.io/pcapng/) file format.
