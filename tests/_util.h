@@ -1,3 +1,5 @@
+// Copyright (c) 2020 Technica Engineering GmbH
+// MIT License (see LICENSE file)
 
 #include "light_io.h"
 #include "light_pcapng.h"

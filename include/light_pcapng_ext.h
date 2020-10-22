@@ -1,7 +1,5 @@
-// light_pcapng_ext.h
-// Created on: Nov 14, 2016
-
-// Copyright (c) 2016
+// Copyright (c) 2020 Technica Engineering GmbH
+// Copyright (c) 2016 Radu Velea
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal

@@ -1,6 +1,4 @@
-// light_zstd_compression.h
-// Created on: Aug 13, 2019
-
+// Copyright (c) 2020 Technica Engineering GmbH
 // Copyright (c) 2019 TMEIC Corporation - Robert Kriener
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
