@@ -47,12 +47,12 @@ struct _light_enhanced_packet_block {
 	uint32_t timestamp_high, timestamp_low;
 	uint32_t capture_packet_length;
 	uint32_t original_capture_length;
-	uint32_t packet_data[0];
+	uint8_t packet_data[0];
 };
 
 struct _light_simple_packet_block {
 	uint32_t original_packet_length;
-	uint32_t packet_data[0];
+	uint8_t packet_data[0];
 };
 
 #ifdef __cplusplus

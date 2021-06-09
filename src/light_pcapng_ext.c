@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "endianness.h"
+
 
 struct light_pcapng_t
 {
@@ -40,6 +42,8 @@ struct light_pcapng_t
 	size_t interfaces_count;
 	light_packet_interface* interfaces;
 	uint32_t section_interface_offset;
+
+	bool swap_endianness;
 };
 
 char* __alloc_option_string(light_block pcapng, uint16_t option_code) {
@@ -92,9 +96,10 @@ static uint64_t __power_of(uint64_t x, uint64_t y)
 	return res;
 }
 
-static void __append_interface_block(light_pcapng pcapng, const light_block interface_block)
+static void __append_interface_block(light_pcapng pcapng, const light_block interface_block, const bool swap_endian)
 {
 	struct _light_interface_description_block* idb = (struct _light_interface_description_block*)interface_block->body;
+	// no endianness conversion here because idb was already fixed
 	light_option ts_resolution_option = NULL;
 
 	light_packet_interface lif = { 0 };
@@ -184,13 +189,16 @@ light_pcapng light_pcapng_create(light_file file, const char* mode, light_pcapng
 	bool update = strstr(mode, "+") != NULL;
 
 	light_pcapng pcapng = calloc(1, sizeof(struct light_pcapng_t));
+	pcapng->swap_endianness = false;
 	pcapng->file = file;
+
+	bool* swap_endianness = &(pcapng->swap_endianness);
 
 	if (read) {
 		//The first thing inside an NG capture is the section header block
 		//When the file is opened we need to go ahead and read that out
 		light_block section = NULL;
-		light_read_block(pcapng->file, &section);
+		light_read_block(pcapng->file, &section, swap_endianness);
 		//Prase stuff out of the section header
 		pcapng->file_info = __create_file_info(section);
 		light_free_block(section);
@@ -206,7 +214,7 @@ light_pcapng light_pcapng_create(light_file file, const char* mode, light_pcapng
 		{
 			// go to beginning of file
 			light_io_seek(file, 0, SEEK_SET);
-			light_read_block(pcapng->file, &block);
+			light_read_block(pcapng->file, &block, swap_endianness);
 			if (block == NULL) {
 				return pcapng;
 			}
@@ -214,7 +222,7 @@ light_pcapng light_pcapng_create(light_file file, const char* mode, light_pcapng
 				pcapng->section_interface_offset = pcapng->interfaces_count;
 			}
 			if (block->type == LIGHT_INTERFACE_BLOCK) {
-				__append_interface_block(pcapng, block);
+				__append_interface_block(pcapng, block, *swap_endianness);
 			}
 		}
 	}
@@ -287,11 +295,13 @@ light_pcapng_file_info* light_create_file_info(const char* os_desc, const char* 
 
 void light_free_file_info(light_pcapng_file_info* info)
 {
-	free(info->app_desc);
-	free(info->comment);
-	free(info->hardware_desc);
-	free(info->os_desc);
-	free(info);
+	if (info != NULL) {
+		free(info->app_desc);
+		free(info->comment);
+		free(info->hardware_desc);
+		free(info->os_desc);
+		free(info);
+	}
 }
 
 light_pcapng_file_info* light_pcang_get_file_info(light_pcapng pcapng)
@@ -312,7 +322,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 	light_block block = NULL;
 	while (1)
 	{
-		light_read_block(pcapng->file, &block);
+		light_read_block(pcapng->file, &block, &(pcapng->swap_endianness));
 		if (block == NULL) {
 			//End of file or something is broken
 			return 0;
@@ -326,7 +336,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 			continue;
 		}
 		if (block->type == LIGHT_INTERFACE_BLOCK) {
-			__append_interface_block(pcapng, block);
+			__append_interface_block(pcapng, block, pcapng->swap_endianness);
 			continue;
 		}
 	}
@@ -336,6 +346,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 	if (block->type == LIGHT_ENHANCED_PACKET_BLOCK)
 	{
 		struct _light_enhanced_packet_block* epb = (struct _light_enhanced_packet_block*)block->body;
+		// no endianness fix needed since fixed before
 
 		packet_header->captured_length = epb->capture_packet_length;
 		packet_header->original_length = epb->original_capture_length;
@@ -358,13 +369,15 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		if (flags_opt != NULL)
 		{
 			packet_header->flags = *(uint32_t*)(flags_opt->data);
+			if (pcapng->swap_endianness) bswap32(packet_header->flags);
 		}
 
 		packet_header->dropcount = 0;
 		light_option dropcount_opt = light_find_option(block, LIGHT_OPTION_EPB_DROPCOUNT);
-		if (dropcount_opt != NULL)
+		if (dropcount_opt != NULL && dropcount_opt->length != 0)
 		{
 			packet_header->dropcount = *(uint64_t*)(dropcount_opt->data);
+			if (pcapng->swap_endianness) bswap64(packet_header->dropcount);
 		}
 
 		*packet_data = (uint8_t*)epb->packet_data;
@@ -373,6 +386,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 	if (block->type == LIGHT_SIMPLE_PACKET_BLOCK)
 	{
 		struct _light_simple_packet_block* spb = (struct _light_simple_packet_block*)block->body;
+		// no endianness fix needed since fixed before
 
 		*packet_header = (const light_packet_header){ 0 };
 		packet_header->captured_length = spb->original_packet_length;
@@ -461,7 +475,7 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 			light_add_option(NULL, iface_block_pcapng, description_option, false);
 		}
 
-		__append_interface_block(pcapng, iface_block_pcapng);
+		__append_interface_block(pcapng, iface_block_pcapng, false);
 		light_write_block(pcapng->file, iface_block_pcapng);
 
 		light_free_block(iface_block_pcapng);
