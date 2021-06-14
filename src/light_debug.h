@@ -19,45 +19,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "light_pcapng.h"
-#include "light_io_file.h"
+#ifndef INCLUDE_LIGHT_DEBUG_H_
+#define INCLUDE_LIGHT_DEBUG_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
-int main(int argc, const char** args) {
-	if (argc < 3) {
-		fprintf(stderr, "Usage %s <outfile> <infile> [<infile> ...]", args[0]);
-		return 1;
-	}
+#ifdef _LIGHT_DEBUG_MODE
+#define __light_stop          getchar()
+#else
+#define __light_stop          (void)0
+#endif
 
-	const char* outfile = args[1];
-	light_file writer = light_io_open(outfile, "wb");
+// XXX: Warning: I should not use these macros with functions!!! Undefined for Release.
 
-	for (int i = 2; i < argc; i++)
-	{
-		const char* infile = args[i];
-		light_file reader = light_io_open(infile, "rb");
-		if (reader == NULL)
-		{
-			light_io_close(writer);
-			fprintf(stderr, "Unable to read pcapng: %s\n", infile);
-			return 1;
-		}
-		light_block block = NULL;
-		bool swap_endianness;
-		light_read_block(reader, &block, &swap_endianness);
-		while (block != NULL)
-		{
-			light_write_block(writer, block);
-			light_read_block(reader, &block, &swap_endianness);
-		}
-		light_io_close(reader);
-	}
+#define DCHECK_ASSERT(x, y)	do { \
+		int x_ret = (int)(x); \
+		int y_ret = (int)(y); \
+		if (x_ret != y_ret) { \
+			fprintf(stderr, "ERROR at %s::%s::%d: %d != %d\n", \
+					__FILE__, __FUNCTION__, __LINE__, x_ret, y_ret); \
+			__light_stop; \
+		} \
+	} while (0)
 
-	light_io_close(writer);
-	return 0;
+#define DCHECK_NULLP(x, other)	do { \
+		void *x_ret = (void *)(x); \
+		if (x_ret == NULL) { \
+			fprintf(stderr, "NULL pointer ERROR at %s::%s::%d\n", \
+					__FILE__, __FUNCTION__, __LINE__); \
+			other; \
+		} \
+	} while (0)
+
+#define PCAPNG_ERROR(symbol)   fprintf(stderr, "Error at: %s::%s::%d, %s\n", __FILE__, __FUNCTION__, __LINE__, #symbol)
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* INCLUDE_LIGHT_DEBUGs_H_ */

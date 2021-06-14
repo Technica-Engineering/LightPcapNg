@@ -1,0 +1,10 @@
+version: 1.0
+comment: (null)
+os: (null)
+hardware: (null)
+app: (null)
+
+Packet #1: cap_len=314, iface=(null), link=1, timestamp=1177611630.539464000
+Packet #2: cap_len=342, iface=(null), link=1, timestamp=1177611630.834464000
+Packet #3: cap_len=314, iface=(null), link=1, timestamp=1177611700.570464000
+Packet #4: cap_len=342, iface=(null), link=1, timestamp=1177611700.884464000
