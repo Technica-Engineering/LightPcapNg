@@ -91,10 +91,11 @@ int main(int argc, const char** args)
 	}
 
 	light_block block = NULL;
-	light_read_block(infile, &block);
+	bool swap_endianness;
+	light_read_block(infile, &block, &swap_endianness);
 	while (block != NULL) {
 		dump_block(outfile, block);
-		light_read_block(infile, &block);
+		light_read_block(infile, &block, &swap_endianness);
 	}
 	light_io_close(infile);
 

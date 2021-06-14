@@ -11,8 +11,10 @@ int light_file_diff(light_file a, light_file b, FILE* out) {
 
 	while (1)
 	{
-		light_read_block(a, &block_a);
-		light_read_block(b, &block_b);
+		bool swap_endianness_a;
+		bool swap_endianness_b;
+		light_read_block(a, &block_a, &swap_endianness_a);
+		light_read_block(b, &block_b, &swap_endianness_b);
 
 		if (block_a == NULL && block_b == NULL) {
 			// EOF

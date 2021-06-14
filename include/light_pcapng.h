@@ -63,14 +63,14 @@ extern "C" {
 	struct light_block_t {
 		uint32_t type;
 		uint32_t total_length;
-		uint32_t* body;
+		uint8_t* body;
 		struct light_option_t* options;
 	};
 
 	struct light_option_t {
 		uint16_t code;
 		uint16_t length;
-		uint32_t* data;
+		uint8_t* data;
 		struct light_option_t* next_option;
 	};
 
@@ -78,11 +78,17 @@ extern "C" {
 	typedef struct light_option_t* light_option;
 
 
+	// endianness fixes
+	void fix_endianness_section_header(struct _light_section_header* sh, const bool swap_endianness);
+	void fix_endianness_interface_description_block(struct _light_interface_description_block* idb, const bool swap_endianness);
+	void fix_endianness_enhanced_packet_block(struct _light_enhanced_packet_block* epb, const bool swap_endianness);
+	void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, const bool swap_endianness);
+
 	// block functions
 
 	// Read next record out of file, if you give an existing record I will free it for you
 	// The returned record must be freed by either YOU or the next call to light_free_block!
-	void light_read_block(light_file fd, light_block* block);
+	void light_read_block(light_file fd, light_block* block, bool *swap_endianess);
 
 	light_block light_create_block(uint32_t type, const uint32_t* body, uint32_t body_length);
 

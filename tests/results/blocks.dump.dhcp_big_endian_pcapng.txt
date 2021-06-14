@@ -1,0 +1,35 @@
+Type: 0x0A0D0D0A
+Length: 28
+Data: 1A2B3C4D01000000...
+Options:
+
+Type: 0x00000001
+Length: 20
+Data: 0100000000000400...
+Options:
+
+Type: 0x00000004
+Length: 36
+Data: 0001000E7F000001...
+Options:
+
+Type: 0x00000006
+Length: 348
+Data: 00000000885EB341...
+Options:
+
+Type: 0x00000006
+Length: 376
+Data: 00000000885EB341...
+Options:
+
+Type: 0x00000006
+Length: 348
+Data: 00000000885EB341...
+Options:
+
+Type: 0x00000006
+Length: 376
+Data: 00000000885EB341...
+Options:
+
