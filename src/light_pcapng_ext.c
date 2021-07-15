@@ -509,7 +509,7 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 	}
 	if (packet_header->flags)
 	{
-		light_option flags_opt = light_create_option(LIGHT_OPTION_EPB_FLAGS, 8, &packet_header->flags);
+		light_option flags_opt = light_create_option(LIGHT_OPTION_EPB_FLAGS, 4, &packet_header->flags);
 		light_add_option(NULL, packet_block_pcapng, flags_opt, false);
 	}
 	if (packet_header->dropcount)
