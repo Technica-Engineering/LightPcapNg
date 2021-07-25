@@ -26,9 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-size_t __get_option_total_size(const light_option option)
+uint16_t __get_option_total_size(const light_option option)
 {
-	size_t size = 0;
+	uint16_t size = 0;
 	light_option iter = option;
 	while (iter != NULL) {
 		uint16_t actual_length;
@@ -85,7 +85,7 @@ light_option light_create_option(const uint16_t option_code, const uint16_t opti
 
 int light_add_option(light_block section, light_block pcapng, light_option option, bool copy)
 {
-	size_t option_size = 0;
+	uint16_t option_size = 0;
 	light_option option_list = NULL;
 
 	if (option == NULL) {

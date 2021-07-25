@@ -157,8 +157,8 @@ size_t light_zstd_read(void* context, void* buf, size_t count)
 		//Now get bytes from our output buffer
 
 		//Case we need everything or less than that which was decoded
-		int needToRead = count - bytes_read;
-		int remaining = (decompression->output.size - decompression->output.pos);
+		size_t needToRead = count - bytes_read;
+		size_t remaining = (decompression->output.size - decompression->output.pos);
 		if (needToRead <= remaining)
 		{
 			memcpy((uint8_t*)buf + bytes_read, (uint8_t*)decompression->output.dst + decompression->output.pos, needToRead);

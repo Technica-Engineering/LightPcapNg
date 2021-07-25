@@ -54,7 +54,7 @@ char* __alloc_option_string(light_block pcapng, uint16_t option_code) {
 		return NULL;
 	}
 
-	char* opt_string = calloc(opt->length + 1, sizeof(char));
+	char* opt_string = calloc((size_t)opt->length + 1, sizeof(char));
 	memcpy(opt_string, (char*)opt->data, opt->length);
 
 	return opt_string;

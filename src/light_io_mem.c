@@ -62,7 +62,7 @@ size_t light_mem_write(void* context, const void* buf, size_t count)
 int light_mem_seek(void* context, long int offset, int origin)
 {
 	mem_context* mem = context;
-	long int new_offset = -1;
+	size_t new_offset = -1;
 	switch (origin)
 	{
 	case SEEK_SET:
