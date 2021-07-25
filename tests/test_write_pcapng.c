@@ -35,8 +35,8 @@ int main(int argc, const char** args) {
 	const char* outfile = args[1];
 	light_pcapng writer = light_pcapng_open(outfile, "wb");
 
-	light_packet_interface pkt_interface;
-	light_packet_header pkt_header;
+	light_packet_interface pkt_interface = { 0 };
+	light_packet_header pkt_header = { 0 };
 	uint8_t* pkt_data = NULL;
 
 

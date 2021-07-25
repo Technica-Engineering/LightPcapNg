@@ -55,3 +55,8 @@ add_test(
     NAME "unit.io.mem"
     COMMAND test_io_mem "${CMAKE_CURRENT_LIST_DIR}/../pcaps/caneth.pcapng"
 )
+
+add_test(
+    NAME "unit.write_pcapng"
+    COMMAND test_write_pcapng "${CMAKE_CURRENT_LIST_DIR}/results/test_write_pcapng.pcapng"
+)
