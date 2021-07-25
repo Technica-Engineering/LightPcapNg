@@ -45,6 +45,14 @@ endif()
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Testing
     include(CTest)
+
+    if(MSVC)
+      target_compile_options(light_pcapng PRIVATE /W4)
+      target_compile_options(light_pcapng_static PRIVATE /W4)
+    else()
+      target_compile_options(light_pcapng PRIVATE -Wall -Wextra -pedantic -Werror)
+      target_compile_options(light_pcapng_static PRIVATE -Wall -Wextra -pedantic -Werror)
+    endif()
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)

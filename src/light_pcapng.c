@@ -209,7 +209,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 
 		current->body = (uint8_t*)epb;
 		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8;
-		light_option opt = __parse_options((uint32_t**)&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
+		light_option opt = __parse_options(&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
 		current->options = opt;
 	}
 	break;
