@@ -380,7 +380,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 			if (pcapng->swap_endianness) bswap64(packet_header->dropcount);
 		}
 
-		*packet_data = (uint8_t*)epb->packet_data;
+		*packet_data = epb->packet_data;
 	}
 
 	if (block->type == LIGHT_SIMPLE_PACKET_BLOCK)
@@ -393,7 +393,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		packet_header->original_length = spb->original_packet_length;
 
 		*packet_interface = pcapng->interfaces[pcapng->section_interface_offset];
-		*packet_data = (uint8_t*)spb->packet_data;
+		*packet_data = spb->packet_data;
 	}
 
 	packet_header->comment = __alloc_option_string(block, LIGHT_OPTION_COMMENT);
