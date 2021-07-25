@@ -79,7 +79,7 @@ void fix_endianness_option(struct light_option_t* opt, const bool swap_endiannes
 	}
 }
 
-static light_option __parse_options(uint8_t** memory, const int32_t max_len, const bool swap_endianness)
+static light_option __parse_options(const uint8_t** memory, const int32_t max_len, const bool swap_endianness)
 {
 	if (max_len <= 0) {
 		return NULL;
@@ -155,7 +155,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 		fix_endianness_section_header(shb, swap_endianness);
 
 		current->body = (uint8_t*)shb;
-		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8 +(size_t)4;
+		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8 + (size_t)4;
 		light_option opt = __parse_options(&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
 		current->options = opt;
 	}
@@ -209,7 +209,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 
 		current->body = (uint8_t*)epb;
 		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8;
-		light_option opt = __parse_options((uint32_t**)&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
+		light_option opt = __parse_options(&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
 		current->options = opt;
 	}
 	break;
@@ -256,7 +256,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 /// </summary>
 /// <param name="fd">File to read from</param>
 /// <returns>The block read from the file - may contain sub blocks</returns>
-void light_read_block(light_file fd, light_block* block, bool *swap_endianness)
+void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 {
 	//FYI general block structure is like this
 
@@ -281,7 +281,8 @@ void light_read_block(light_file fd, light_block* block, bool *swap_endianness)
 	bool section_header;
 
 	//See the block type, if end of file this will tell us
-	uint32_t blockType, blockSize, bytesRead;
+	uint32_t blockType, blockSize;
+	size_t bytesRead;
 	bytesRead = light_io_read(fd, &blockType, sizeof(blockType));
 	section_header = (blockType == LIGHT_SECTION_HEADER_BLOCK);
 
@@ -319,7 +320,7 @@ void light_read_block(light_file fd, light_block* block, bool *swap_endianness)
 		bytesRead = light_io_seek(fd, -4L, SEEK_CUR);
 
 		*swap_endianness = (byte_order_magic != BYTE_ORDER_MAGIC);
-		
+
 		if (*swap_endianness) {
 			assert(byte_order_magic == 0x4D3C2B1A);
 			// SHB blocktype needs no fixing

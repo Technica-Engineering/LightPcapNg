@@ -35,8 +35,8 @@ int main(int argc, const char** args) {
 	const char* outfile = args[1];
 	light_pcapng writer = light_pcapng_open(outfile, "wb");
 
-	light_packet_interface pkt_interface;
-	light_packet_header pkt_header;
+	light_packet_interface pkt_interface = { 0 };
+	light_packet_header pkt_header = { 0 };
 	uint8_t* pkt_data = NULL;
 
 
@@ -47,9 +47,7 @@ int main(int argc, const char** args) {
 	pkt_interface.timestamp_resolution = 1000000000;
 
 	// Set packet header
-	struct timespec ts;
-	clockid_t clk_id = CLOCK_REALTIME;
-	clock_gettime(clk_id, &ts);
+	struct timespec ts = { 1627228400 , 5000 };
 	pkt_header.timestamp = ts;
 	pkt_header.captured_length = 256;
 	pkt_header.original_length = 1024;
@@ -59,7 +57,7 @@ int main(int argc, const char** args) {
 
 
 	// Pkt content
-	pkt_data = (uint8_t *) malloc(pkt_header.captured_length * sizeof(uint8_t));
+	pkt_data = (uint8_t*)malloc(pkt_header.captured_length * sizeof(uint8_t));
 	memset(pkt_data, '-', pkt_header.captured_length);
 
 	light_write_packet(writer, &pkt_interface, &pkt_header, pkt_data);

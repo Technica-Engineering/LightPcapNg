@@ -26,12 +26,11 @@
 #include <ctype.h>
 #include <string.h>
 
-void dump_hex(FILE* out, uint32_t* data, size_t size)
+void dump_hex(FILE* out, uint8_t* data, size_t size)
 {
-	uint8_t* ptr = (uint8_t*)data;
 	for (int i = 0; i < size; i++)
 	{
-		fprintf(out, "%02X", *(ptr + i));
+		fprintf(out, "%02X", *(data + i));
 	}
 }
 

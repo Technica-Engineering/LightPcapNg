@@ -45,6 +45,16 @@ endif()
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Testing
     include(CTest)
+
+    # We compile with warnings as error on non Windows,
+    # We will make it even more strict in the future
+    if(MSVC)
+      target_compile_options(light_pcapng PRIVATE /W4)
+      target_compile_options(light_pcapng_static PRIVATE /W4)
+    else()
+      target_compile_options(light_pcapng PRIVATE -Werror)
+      target_compile_options(light_pcapng_static PRIVATE -Werror)
+    endif()
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
