@@ -53,6 +53,7 @@ int main(int argc, const char** args) {
 	pkt_header.original_length = 1024;
 	pkt_header.flags = 0x1; // direction indicator
 	pkt_header.dropcount = 0;
+	pkt_header.queue = 1;
 	pkt_header.comment = "Packet comment";
 
 

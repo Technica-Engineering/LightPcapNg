@@ -55,6 +55,7 @@ typedef struct light_packet_header {
 	char* comment;
 	uint32_t flags;
 	uint64_t dropcount;
+	uint32_t queue;
 
 } light_packet_header;
 
