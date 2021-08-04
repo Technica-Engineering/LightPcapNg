@@ -47,6 +47,7 @@ extern "C" {
 
 #define LIGHT_OPTION_EPB_FLAGS             2
 #define LIGHT_OPTION_EPB_DROPCOUNT         4
+#define LIGHT_OPTION_EPB_QUEUE             6
 
 #define BYTE_ORDER_MAGIC            0x1A2B3C4D
 

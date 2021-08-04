@@ -380,6 +380,14 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 			if (pcapng->swap_endianness) bswap64(packet_header->dropcount);
 		}
 
+		packet_header->queue = 0;
+		light_option queue_opt = light_find_option(block, LIGHT_OPTION_EPB_QUEUE);
+		if (queue_opt != NULL && queue_opt->length != 0)
+		{
+			packet_header->queue = *(uint32_t*)(queue_opt->data);
+			if (pcapng->swap_endianness) bswap32(packet_header->queue);
+		}
+
 		*packet_data = epb->packet_data;
 	}
 
@@ -516,6 +524,11 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 	{
 		light_option dropcount_opt = light_create_option(LIGHT_OPTION_EPB_DROPCOUNT, 8, &packet_header->dropcount);
 		light_add_option(NULL, packet_block_pcapng, dropcount_opt, false);
+	}
+	if (packet_header->queue)
+	{
+		light_option queue_opt = light_create_option(LIGHT_OPTION_EPB_QUEUE, 4, &packet_header->queue);
+		light_add_option(NULL, packet_block_pcapng, queue_opt, false);
 	}
 
 	light_write_block(pcapng->file, packet_block_pcapng);
