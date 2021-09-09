@@ -28,6 +28,12 @@ file(GLOB LIGHT_SOURCES src/*.c)
 add_library(light_pcapng ${LIGHT_SOURCES})
 
 target_include_directories(light_pcapng PUBLIC "include")
+# Export API symbols when the library is created
+
+if (BUILD_SHARED_LIBS)
+  target_compile_definitions(light_pcapng PRIVATE LIGHT_EXPORTS=1)
+  target_compile_definitions(light_pcapng PUBLIC LIGHT_IMPORTS=1) 
+endif()
 
 # ZSTD
 

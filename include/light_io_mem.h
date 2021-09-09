@@ -22,9 +22,10 @@
 #ifndef INCLUDE_LIGHT_IO_MEM_H_
 #define INCLUDE_LIGHT_IO_MEM_H_
 
+#include "light_export.h"
 #include "light_io.h"
 #include <stdio.h>
 
-light_file light_io_mem_create(void* memory, size_t size);
+LIGHT_API light_file light_io_mem_create(void* memory, size_t size);
 
 #endif // INCLUDE_LIGHT_IO_MEM_H_
