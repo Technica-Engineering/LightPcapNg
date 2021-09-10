@@ -53,6 +53,7 @@ int read_file(const char* file, uint8_t** data, size_t* size)
 }
 
 int main(int argc, const char** args) {
+
 	if (argc != 2) {
 		fprintf(stderr, "Usage %s [infile]", args[0]);
 		return 1;
