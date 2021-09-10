@@ -32,7 +32,7 @@ target_include_directories(light_pcapng PUBLIC "include")
 
 if (BUILD_SHARED_LIBS)
   target_compile_definitions(light_pcapng PRIVATE LIGHT_EXPORTS=1)
-  target_compile_definitions(light_pcapng PUBLIC LIGHT_IMPORTS=1) 
+  target_compile_definitions(light_pcapng PUBLIC LIGHT_IMPORTS=1)
 endif()
 
 # ZSTD

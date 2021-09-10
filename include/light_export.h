@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,11 +23,11 @@
 
 /* =====   LIGHT_API : control library symbols visibility   ===== */
 #ifndef LIGHT_VISIBILITY
-#  if defined(__GNUC__) && (__GNUC__ >= 4)
-#    define LIGHT_VISIBILITY __attribute__ ((visibility ("default")))
-#  else
-#    define LIGHT_VISIBILITY
-#  endif
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define LIGHT_VISIBILITY __attribute__((visibility("default")))
+#else
+#define LIGHT_VISIBILITY
+#endif
 #endif
 
 /* API call convention*/
@@ -38,37 +38,19 @@
 #endif
 
 #if defined LIGHT_EXPORTS && (LIGHT_EXPORTS == 1)
-# ifdef _MSC_VER
-#   define LIGHT_API __declspec(dllexport) LIGHT_VISIBILITY
-# else 
-#   define LIGHT_API LIGHT_VISIBILITY
-# endif
+#ifdef _MSC_VER
+#define LIGHT_API __declspec(dllexport) LIGHT_VISIBILITY
+#else
+#define LIGHT_API LIGHT_VISIBILITY
+#endif
 #elif defined LIGHT_IMPORTS && (LIGHT_IMPORTS == 1)
-# ifdef _MSC_VER
-#   define LIGHT_API __declspec(dllimport) LIGHT_VISIBILITY
-# else 
-#   define LIGHT_API LIGHT_VISIBILITY
-# endif
-#else 
-# define LIGHT_API LIGHT_VISIBILITY
+#ifdef _MSC_VER
+#define LIGHT_API __declspec(dllimport) LIGHT_VISIBILITY
+#else
+#define LIGHT_API LIGHT_VISIBILITY
 #endif
-
-#if 0
-#if defined LIGHT_EXPORTS && (LIGHT_EXPORTS == 1)
-# ifdef _MSC_VER
-#   define LIGHT_API __declspec(dllexport) LIGHT_VISIBILITY
-# else 
-#   define LIGHT_API LIGHT_VISIBILITY
-# endif
-#elif defined LIGHT_EXPORTS && (LIGHT_EXPORTS == 0)
-# ifdef _MSC_VER
-#   define LIGHT_API __declspec(dllimport) LIGHT_VISIBILITY
-# else 
-#   define LIGHT_API LIGHT_VISIBILITY
-# endif
-#else 
-#  define LIGHT_API LIGHT_VISIBILITY
-#endif
+#else
+#define LIGHT_API LIGHT_VISIBILITY
 #endif
 
 #endif /* INCLUDE_EXPORT_H_ */
