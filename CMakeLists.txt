@@ -73,3 +73,11 @@ endif()
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
+
+include(GNUInstallDirs)
+install(TARGETS light_pcapng)
+install(DIRECTORY include/
+    DESTINATION include
+    FILES_MATCHING
+    PATTERN *.h
+)
