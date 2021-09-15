@@ -24,8 +24,22 @@ endif()
 # Configuration
 
 file(GLOB LIGHT_SOURCES src/*.c)
+set(light_pcapng_HEADERS
+  include/light_io.h
+  include/light_export.h
+  include/light_io.h
+  include/light_io_file.h
+  include/light_io_mem.h
+  include/light_io_zstd.h
+  include/light_pcapng.h
+  include/light_pcapng_ext.h
+  include/light_special.h
+  include/light_util.h
+  )
 
 add_library(light_pcapng ${LIGHT_SOURCES})
+set_target_properties(light_pcapng PROPERTIES PUBLIC_HEADER
+  "${light_pcapng_HEADERS}")
 
 target_include_directories(light_pcapng PUBLIC "include")
 # Export API symbols when the library is created
@@ -44,7 +58,13 @@ if(LIGHT_USE_ZSTD)
     find_package(zstd QUIET)
     if (zstd_FOUND)
         # zstd was already found, so we don't resolve our dependency by ourself
-        set(light_zstd_dependency_name zstd::zstd)
+        # Check if dependency was resolved by conan (find_package generator)
+        if (CONAN_ZSTD_ROOT)
+          set(light_zstd_dependency_name zstd::zstd)
+        else()
+          # use the default cmake name
+          set(light_zstd_dependency_name zstd)
+        endif()
     else()
         include(cmake/zstd.cmake)
         if (BUILD_SHARED_LIBS)
@@ -75,9 +95,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 endif()
 
 include(GNUInstallDirs)
-install(TARGETS light_pcapng)
-install(DIRECTORY include/
-    DESTINATION include
-    FILES_MATCHING
-    PATTERN *.h
-)
+install(TARGETS light_pcapng
+  PUBLIC_HEADER DESTINATION include
+  )
