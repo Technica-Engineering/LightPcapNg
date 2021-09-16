@@ -89,23 +89,23 @@ extern "C" {
 
 	// Read next record out of file, if you give an existing record I will free it for you
 	// The returned record must be freed by either YOU or the next call to light_free_block!
-	LIGHT_API void light_read_block(light_file fd, light_block* block, bool *swap_endianess);
+	LIGHT_API void LIGHT_API_CALL light_read_block(light_file fd, light_block* block, bool *swap_endianess);
 
-	LIGHT_API light_block light_create_block(uint32_t type, const uint32_t* body, uint32_t body_length);
+	LIGHT_API light_block LIGHT_API_CALL light_create_block(uint32_t type, const uint32_t* body, uint32_t body_length);
 
-	LIGHT_API void light_free_block(light_block pcapng);
+	LIGHT_API void LIGHT_API_CALL light_free_block(light_block pcapng);
 
-	LIGHT_API size_t light_write_block(light_file file, const light_block block);
+	LIGHT_API size_t LIGHT_API_CALL light_write_block(light_file file, const light_block block);
 
 	// option functions
 
-	LIGHT_API light_option light_create_option(const uint16_t option_code, const uint16_t option_length, const void* option_value);
-	LIGHT_API void light_free_option(light_option option);
+	LIGHT_API light_option LIGHT_API_CALL light_create_option(const uint16_t option_code, const uint16_t option_length, const void* option_value);
+	LIGHT_API void LIGHT_API_CALL light_free_option(light_option option);
 
-	LIGHT_API light_option light_find_option(const light_block block, uint16_t option_code);
+	LIGHT_API light_option LIGHT_API_CALL light_find_option(const light_block block, uint16_t option_code);
 
-	LIGHT_API int light_add_option(light_block section, light_block block, light_option option, bool copy);
-	LIGHT_API int light_update_option(light_block section, light_block block, light_option option);
+	LIGHT_API int LIGHT_API_CALL light_add_option(light_block section, light_block block, light_option option, bool copy);
+	LIGHT_API int LIGHT_API_CALL light_update_option(light_block section, light_block block, light_option option);
 
 
 #ifdef __cplusplus

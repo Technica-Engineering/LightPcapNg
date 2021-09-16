@@ -32,7 +32,7 @@
 
 /* API call convention*/
 #if WIN32
-#define LIGHT_API_CALL __stdcall
+#define LIGHT_API_CALL __cdecl
 #else
 #define LIGHT_API_CALL
 #endif
