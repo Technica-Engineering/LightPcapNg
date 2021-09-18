@@ -22,17 +22,19 @@
 #ifndef INCLUDE_LIGHT_IO_H_
 #define INCLUDE_LIGHT_IO_H_
 
+#include "light_export.h"
+
 #include <stdio.h>
 
 typedef struct light_file_t* light_file;
 
-light_file light_io_open(const char* file_name, const char* mode);
+LIGHT_API light_file LIGHT_API_CALL light_io_open(const char* file_name, const char* mode);
 
-size_t light_io_read(light_file fd, void* buf, size_t count);
-size_t light_io_write(light_file fd, const void* buf, size_t count);
+LIGHT_API size_t LIGHT_API_CALL light_io_read(light_file fd, void* buf, size_t count);
+LIGHT_API size_t LIGHT_API_CALL light_io_write(light_file fd, const void* buf, size_t count);
 
-int light_io_seek(light_file fd, long int offset, int origin);
-int light_io_flush(light_file fd);
-int light_io_close(light_file fd);
+LIGHT_API int LIGHT_API_CALL light_io_seek(light_file fd, long int offset, int origin);
+LIGHT_API int LIGHT_API_CALL light_io_flush(light_file fd);
+LIGHT_API int LIGHT_API_CALL light_io_close(light_file fd);
 
 #endif /* INCLUDE_LIGHT_IO_H_ */
