@@ -94,7 +94,7 @@ if(LIGHT_USE_ZSTD)
       # this pthread linking is required for the static linking of certain zstd version. See: https://github.com/facebook/zstd/pull/2097 
       find_package (Threads REQUIRED)
       target_link_libraries (light_pcapng ${CMAKE_THREAD_LIBS_INIT})
-    else()
+    endif()
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
