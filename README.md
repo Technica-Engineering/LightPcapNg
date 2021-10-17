@@ -1,5 +1,6 @@
-![](https://img.shields.io/github/workflow/status/Technica-Engineering/LightPcapNg/CMake)
-![](https://img.shields.io/github/license/Technica-Engineering/LightPcapNg)
+[![](https://github.com/Technica-Engineering/LightPcapNg/actions/workflows/cmake.yml/badge.svg)](https://github.com/Technica-Engineering/LightPcapNg/actions?query=branch%3Amaster)
+[![](https://img.shields.io/github/license/Technica-Engineering/LightPcapNg)](LICENSE)
+[![](https://codecov.io/gh/Technica-Engineering/LightPcapNg/branch/master/graph/badge.svg?token=BA5FFK35C2)](https://codecov.io/gh/Technica-Engineering/LightPcapNg)
 
 # LightPcapNg
 
