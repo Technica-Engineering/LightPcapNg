@@ -2,10 +2,6 @@ name: CMake
 
 on: [push, pull_request, fork]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   build:
     runs-on: ${{matrix.os}}
@@ -18,20 +14,26 @@ jobs:
           # CMake don't copy DLLs to exe output, skip for now
           - os: windows-latest
             shared: ON
+    env:
+      CMAKE_BUILD_TYPE: Release
+      BUILD_SHARED_LIBS: ${{matrix.shared}}
     steps:
     - uses: actions/checkout@v2
+    - uses: lukka/get-cmake@latest
+    - run: |
+        cmake --preset default
+        cmake --build --parallel --preset default
+        ctest --preset default
 
-    - name: Create Build Environment
-      run: cmake -E make_directory build
-
-    - name: Configure CMake
-      working-directory: build
-      run: cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_SHARED_LIBS=${{matrix.shared}}
-
-    - name: Build
-      working-directory: build
-      run: cmake --build . --config ${{env.BUILD_TYPE}}
-
-    - name: Test
-      working-directory: build
-      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+  memcheck:
+    runs-on: ubuntu-latest
+    env:
+      CMAKE_BUILD_TYPE: Debug
+    steps:
+    - uses: actions/checkout@v2
+    - uses: lukka/get-cmake@latest
+    - run: |
+        apt-get install -y valgrind
+        cmake --preset default
+        cmake --build --parallel --preset default
+        ctest -T memcheck --preset default
