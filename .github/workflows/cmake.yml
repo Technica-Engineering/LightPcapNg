@@ -27,6 +27,8 @@ jobs:
     - name: Test
       working-directory: build
       run: ctest -C ${{env.CMAKE_BUILD_TYPE}} --output-on-failure
+    - name: Post Test
+      run: git diff --exit-code
 
   memcheck:
     runs-on: ubuntu-latest
@@ -45,4 +47,6 @@ jobs:
       run: |
         ctest -T memcheck --overwrite MemoryCheckCommandOptions="--leak-check=full --show-leak-kinds=all --error-exitcode=100"
         awk 'FNR==1 {print "\n\n\n\n\n\t", FILENAME, "\n"}{print}' Testing/Temporary/MemoryChecker.*.log
+    - name: Post Test
+      run: git diff --exit-code
 
