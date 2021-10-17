@@ -45,12 +45,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   endif()
 
   if(BUILD_COVERAGE)
-    target_compile_options(light_pcapng INTERFACE
+    target_compile_options(light_pcapng PUBLIC
       -O0        # no optimization
       -g         # generate debug info
       --coverage # sets all required flags
     )
-    target_link_options(light_pcapng INTERFACE --coverage)
+    target_link_options(light_pcapng PUBLIC --coverage)
   endif()
 
   # We compile with warnings as error on non Windows, We will make it even more
