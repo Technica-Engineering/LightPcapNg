@@ -95,8 +95,8 @@ jobs:
           ls output/default/hangs
         # Remove special chars from file names
       - run: |
-          rename -n 's/:/_/g' output/default/crashes/*
-          rename -n 's/:/_/g' output/default/hangs/*
+          rename 's/:/_/g' output/default/crashes/*
+          rename 's/:/_/g' output/default/hangs/*
         
       - name: Check
         # Remove non-empty dirs, if they are not empry rmdir will fail
