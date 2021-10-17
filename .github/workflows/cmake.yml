@@ -63,3 +63,40 @@ jobs:
       run: git diff --exit-code
     - uses: codecov/codecov-action@v2
 
+  fuzz:
+    runs-on: ubuntu-latest
+    container: aflplusplus/aflplusplus
+    env:
+      AFL_SKIP_CPUFREQ: 1
+    steps:
+      - run: mkdir /src && cd /src
+      - uses: actions/checkout@v2
+      - uses: lukka/get-cmake@latest
+      - name: Build
+        run: |
+          cmake --preset Debug -DCMAKE_C_COMPILER=afl-cc -DCMAKE_CXX_COMPILER=afl-c++
+          cmake --build --parallel --preset Debug
+      - name: Fuzz
+        # Fuzz for 60 seconds, until we fix the bugs we have
+        # Fuuz only pcapng files for now
+        run: |
+          mkdir input
+          cp pcaps/*.pcapng input
+          afl-fuzz -V 60 -i input -o output -e .pcapng -- build/tests/test_packets_dump @@ /dev/null
+          afl-stat.sh output/default
+          cat output/default/fuzzer_stats
+        
+      - name: Check
+        # Remove non-empty dirs, if they are not empry rmdir will fail
+        run: |
+          rmdir output/default/crashes
+          rmdir output/default/crashes
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: fuzz
+          retention-days: 7
+          path: |
+            output/default/crashes/*
+            output/default/hangs/*
