@@ -2,28 +2,29 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "default",
-      "displayName": "Default Config",
+      "name": "Release",
+      "displayName": "Release Config",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "$penv{CMAKE_BUILD_TYPE}",
         "BUILD_SHARED_LIBS": "$penv{BUILD_SHARED_LIBS}"
       }
+    },
+    {
+      "name": "Debug",
+      "displayName": "Debug Config",
+      "binaryDir": "${sourceDir}/build"
     }
   ],
   "buildPresets": [
     {
-      "name": "default",
-      "configurePreset": "default"
-    }
-  ],
-  "testPresets": [
+      "name": "Release",
+      "configuration": "Release",
+      "configurePreset": "Release"
+    },
     {
-      "name": "default",
-      "configurePreset": "default",
-      "output": {
-        "outputOnFailure": true
-      }
+      "name": "Debug",
+      "configuration": "Debug",
+      "configurePreset": "Debug"
     }
   ]
 }

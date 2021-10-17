@@ -15,33 +15,30 @@ jobs:
           - os: windows-latest
             shared: ON
     env:
-      CMAKE_BUILD_TYPE: Release
       BUILD_SHARED_LIBS: ${{matrix.shared}}
     steps:
     - uses: actions/checkout@v2
     - uses: lukka/get-cmake@latest
     - name: Build
       run: |
-        cmake --preset default
-        cmake --build --parallel --preset default
+        cmake --preset Release
+        cmake --build --parallel --preset Release
     - name: Test
       working-directory: build
-      run: ctest -C ${{env.CMAKE_BUILD_TYPE}} --output-on-failure
+      run: ctest -C Release --output-on-failure
     - name: Post Test
       run: git diff --exit-code
 
   memcheck:
     runs-on: ubuntu-latest
-    env:
-      CMAKE_BUILD_TYPE: Debug
     steps:
     - uses: actions/checkout@v2
     - uses: lukka/get-cmake@latest
     - name: Build
       run: |
         sudo apt-get install -y valgrind
-        cmake --preset default
-        cmake --build --parallel --preset default
+        cmake --preset Debug
+        cmake --build --parallel --preset Debug
     - name: Test
       working-directory: build
       run: |
