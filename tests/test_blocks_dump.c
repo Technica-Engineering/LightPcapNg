@@ -90,7 +90,7 @@ int main(int argc, const char** args)
 	}
 
 	light_block block = NULL;
-	bool swap_endianness;
+	bool swap_endianness = false;
 	light_read_block(infile, &block, &swap_endianness);
 	while (block != NULL) {
 		dump_block(outfile, block);

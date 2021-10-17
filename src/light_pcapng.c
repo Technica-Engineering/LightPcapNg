@@ -278,15 +278,13 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 	*block = NULL;
 
 	light_block current;
-	bool section_header;
 
 	//See the block type, if end of file this will tell us
 	uint32_t blockType, blockSize;
 	size_t bytesRead;
 	bytesRead = light_io_read(fd, &blockType, sizeof(blockType));
-	section_header = (blockType == LIGHT_SECTION_HEADER_BLOCK);
+	bool section_header = (blockType == LIGHT_SECTION_HEADER_BLOCK);
 
-	if (*swap_endianness && !section_header) blockType = bswap32(blockType);
 	if (bytesRead != sizeof(blockType))
 	{
 		current = NULL;
@@ -296,13 +294,11 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 	//A block remains to be read so allocate here
 	current = calloc(1, sizeof(struct light_block_t));
 	DCHECK_NULLP(current, return);
-	current->type = blockType;
 
 	//From here on if there is malformed block data we need to release the block we just allocated!
 
 	//Get block size
 	bytesRead = light_io_read(fd, &current->total_length, sizeof(blockSize));
-	if (*swap_endianness && !section_header) current->total_length = bswap32(current->total_length);
 	if (bytesRead != sizeof(blockSize))
 	{
 		// EOF
@@ -323,10 +319,14 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 
 		if (*swap_endianness) {
 			assert(byte_order_magic == 0x4D3C2B1A);
-			// SHB blocktype needs no fixing
-			current->total_length = bswap32(current->total_length);
 		}
 	}
+
+	if (*swap_endianness) {
+		blockType = bswap32(blockType);
+		current->total_length = bswap32(current->total_length);
+	}
+	current->type = blockType;
 
 	//rules for file say this must be on 32bit boundary
 	assert((current->total_length % 4) == 0);

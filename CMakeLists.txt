@@ -4,15 +4,6 @@ project(light_pcapng C)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
-  if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE
-        Debug
-        CACHE
-          STRING
-          "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-          FORCE)
-  endif()
-
   # Dr Memory
   find_program(DRMEMORY_COMMAND "drmemory" DOC "Path to Dr. Memory binary")
   if(DRMEMORY_COMMAND)

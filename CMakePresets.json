@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "Release",
+      "displayName": "Release Config",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "$penv{BUILD_SHARED_LIBS}"
+      }
+    },
+    {
+      "name": "Debug",
+      "displayName": "Debug Config",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Release",
+      "configuration": "Release",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "Debug",
+      "configuration": "Debug",
+      "configurePreset": "Debug"
+    }
+  ]
+}
