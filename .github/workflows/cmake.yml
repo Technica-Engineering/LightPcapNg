@@ -36,4 +36,6 @@ jobs:
         sudo apt-get install -y valgrind
         cmake --preset default
         cmake --build --parallel --preset default
-        ctest -T memcheck --preset default
+    - working-directory: build
+      run: ctest -T memcheck
+

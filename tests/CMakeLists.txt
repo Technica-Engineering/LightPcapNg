@@ -4,8 +4,6 @@ if(MSVC)
     add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-find_program(MEMORYCHECK_COMMAND valgrind)
-
 # Tests
 file(GLOB LIGHT_TESTS *.c)
 
