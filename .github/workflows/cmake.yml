@@ -12,10 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-          - os: windows-latest
-          - os: macos-latest
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        shared: [ON, OFF]
     steps:
     - uses: actions/checkout@v2
 
@@ -24,7 +22,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: build
-      run: cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_SHARED_LIBS=${{matrix.shared}}
 
     - name: Build
       working-directory: build
