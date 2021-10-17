@@ -62,6 +62,7 @@ int main(int argc, const char** args) {
 	memset(pkt_data, '-', pkt_header.captured_length);
 
 	light_write_packet(writer, &pkt_interface, &pkt_header, pkt_data);
+	free(pkt_data);
 	light_pcapng_close(writer);
 	return 0;
 }

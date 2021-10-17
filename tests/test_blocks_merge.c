@@ -48,7 +48,7 @@ int main(int argc, const char** args) {
 			return 1;
 		}
 		light_block block = NULL;
-		bool swap_endianness;
+		bool swap_endianness = false;
 		light_read_block(reader, &block, &swap_endianness);
 		while (block != NULL)
 		{
