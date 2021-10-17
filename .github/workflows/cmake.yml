@@ -75,6 +75,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y python3-pip
+          apt-get install -y rename
           pip install cmake
       - name: Build
         run: |
@@ -89,12 +90,19 @@ jobs:
           afl-fuzz -V 60 -i input -o output -e .pcapng -- build/tests/test_packets_dump @@ /dev/null
           afl-stat.sh output/default
           cat output/default/fuzzer_stats
+
+          ls output/default/crashes
+          ls output/default/hangs
+        # Remove special chars from file names
+      - run: |
+          rename -n 's/:/_/g' output/default/crashes/*
+          rename -n 's/:/_/g' output/default/hangs/*
         
       - name: Check
         # Remove non-empty dirs, if they are not empry rmdir will fail
         run: |
           rmdir output/default/crashes
-          rmdir output/default/crashes
+          rmdir output/default/hangs
 
       - uses: actions/upload-artifact@v2
         if: failure()
