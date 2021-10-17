@@ -1,19 +1,6 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.13)
 
 project(light_pcapng C)
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-
-  # Dr Memory
-  find_program(DRMEMORY_COMMAND "drmemory" DOC "Path to Dr. Memory binary")
-  if(DRMEMORY_COMMAND)
-    set(MEMORYCHECK_TYPE DrMemory)
-    # Needed so Dr. Memory can work correctly See
-    # https://dynamorio.org/drmemory_docs/page_prep.html
-    string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
-  endif()
-
-endif()
 
 # Configuration
 
@@ -53,6 +40,18 @@ endif()
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Testing
   include(CTest)
+  if(BUILD_TESTING)
+    add_subdirectory(tests)
+  endif()
+
+  if(BUILD_COVERAGE)
+    target_compile_options(light_pcapng INTERFACE
+      -O0        # no optimization
+      -g         # generate debug info
+      --coverage # sets all required flags
+    )
+    target_link_options(light_pcapng INTERFACE --coverage)
+  endif()
 
   # We compile with warnings as error on non Windows, We will make it even more
   # strict in the future
@@ -61,10 +60,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   else()
     target_compile_options(light_pcapng PRIVATE -Werror)
   endif()
-endif()
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-  add_subdirectory(tests)
 endif()
 
 include(GNUInstallDirs)

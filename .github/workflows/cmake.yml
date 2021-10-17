@@ -47,3 +47,19 @@ jobs:
     - name: Post Test
       run: git diff --exit-code
 
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: lukka/get-cmake@latest
+    - name: Build
+      run: |
+        cmake --preset Debug -DBUILD_COVERAGE=ON
+        cmake --build --parallel --preset Debug
+    - name: Test
+      working-directory: build
+      run: ctest -T test -T coverage
+    - name: Post Test
+      run: git diff --exit-code
+    - uses: codecov/codecov-action@v2
+
