@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: lukka/get-cmake@latest
     - run: |
-        apt-get install -y valgrind
+        sudo apt-get install -y valgrind
         cmake --preset default
         cmake --build --parallel --preset default
         ctest -T memcheck --preset default
