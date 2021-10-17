@@ -23,7 +23,7 @@ jobs:
     - run: |
         cmake --preset default
         cmake --build --parallel --preset default
-        ctest --preset default
+        ctest -C ${{env.CMAKE_BUILD_TYPE}} --preset default
 
   memcheck:
     runs-on: ubuntu-latest

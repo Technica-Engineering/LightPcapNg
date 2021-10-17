@@ -21,7 +21,6 @@
     {
       "name": "default",
       "configurePreset": "default",
-      "configuration": "$penv{CMAKE_BUILD_TYPE}",
       "output": {
         "outputOnFailure": true
       }
