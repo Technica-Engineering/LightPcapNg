@@ -71,7 +71,11 @@ jobs:
     steps:
       - run: mkdir /src && cd /src
       - uses: actions/checkout@v2
-      - uses: lukka/get-cmake@latest
+      - name: Install
+        run: |
+          apt-get update
+          apt-get install -y python3-pip
+          pip install cmake
       - name: Build
         run: |
           cmake --preset Debug -DCMAKE_C_COMPILER=afl-cc -DCMAKE_CXX_COMPILER=afl-c++
