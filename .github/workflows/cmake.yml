@@ -79,8 +79,8 @@ jobs:
           pip install cmake
       - name: Build
         run: |
-          cmake --preset Debug -DCMAKE_C_COMPILER=afl-cc -DCMAKE_CXX_COMPILER=afl-c++
-          cmake --build --parallel --preset Debug
+          cmake --preset Release -DCMAKE_C_COMPILER=afl-cc -DCMAKE_CXX_COMPILER=afl-c++
+          cmake --build --parallel --preset Release
       - name: Fuzz
         # Fuzz for 60 seconds, until we fix the bugs we have
         # Fuuz only pcapng files for now
