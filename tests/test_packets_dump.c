@@ -50,7 +50,7 @@ int main(int argc, const char** args) {
 	int index = 1;
 
 	while (1) {
-		light_packet_interface pkt_interface;
+		light_packet_interface pkt_interface = { 0 };
 		light_packet_header pkt_header;
 		const uint8_t* pkt_data = NULL;
 		int res = 0;

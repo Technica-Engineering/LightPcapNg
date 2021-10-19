@@ -310,6 +310,17 @@ light_pcapng_file_info* light_pcang_get_file_info(light_pcapng pcapng)
 	return pcapng->file_info;
 }
 
+void __get_interface(light_pcapng pcapng, size_t index, light_packet_interface* inf)
+{
+	DCHECK_NULLP(pcapng, return);
+	DCHECK_NULLP(pcapng->interfaces, return);
+	if (index < pcapng->interfaces_count) {
+		*inf = pcapng->interfaces[index];
+	}
+	// We got a packet without interface
+	// Corrupt PCAPNG
+}
+
 int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interface, light_packet_header* packet_header, const uint8_t** packet_data)
 {
 	DCHECK_NULLP(pcapng, return 0);
@@ -354,8 +365,13 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		timestamp = timestamp << 32;
 		timestamp += epb->timestamp_low;
 
-		*packet_interface = pcapng->interfaces[pcapng->section_interface_offset + epb->interface_id];
+		__get_interface(pcapng, pcapng->section_interface_offset + epb->interface_id, packet_interface);
+		// Default value in case of corrupt PCAPNG without interface
 		uint64_t ts_res = packet_interface->timestamp_resolution;
+		if (!ts_res)
+		{
+			ts_res = 1000000;
+		}
 
 		uint64_t ts_secs = timestamp / ts_res;
 		uint64_t ts_frac = timestamp % ts_res;
@@ -399,8 +415,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		*packet_header = (const light_packet_header){ 0 };
 		packet_header->captured_length = spb->original_packet_length;
 		packet_header->original_length = spb->original_packet_length;
-
-		*packet_interface = pcapng->interfaces[pcapng->section_interface_offset];
+		__get_interface(pcapng, pcapng->section_interface_offset, packet_interface);
 		*packet_data = spb->packet_data;
 	}
 
