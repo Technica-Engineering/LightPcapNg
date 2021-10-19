@@ -31,6 +31,8 @@
 
 #include "endianness.h"
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 // Documentation from: https://github.com/pcapng/pcapng
 
 void fix_endianness_section_header(struct _light_section_header* sh, const bool swap_endianness)
@@ -185,10 +187,11 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 	{
 		struct _light_enhanced_packet_block* epb = NULL;
 
-		uint32_t tmp = *(uint32_t*)(local_data + 12);
-		if (swap_endianness) tmp = bswap32(tmp);
+		uint32_t len = *(uint32_t*)(local_data + 12);
+		if (swap_endianness) len = bswap32(len);
+		len = MIN(len, current->total_length - 32);
 		uint32_t actual_len = 0;
-		PADD32(tmp, &actual_len);
+		PADD32(len, &actual_len);
 
 		epb = calloc(1, sizeof(struct _light_enhanced_packet_block) + actual_len);
 		epb->interface_id = *(uint32_t*)local_data;
@@ -203,8 +206,9 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 		local_data += 4;
 
 		fix_endianness_enhanced_packet_block(epb, swap_endianness);
-
-		memcpy(epb->packet_data, local_data, epb->capture_packet_length);
+		len = MIN(len, epb->capture_packet_length);
+		len = MIN(len, epb->original_capture_length);
+		memcpy(epb->packet_data, local_data, len);
 		local_data += actual_len;
 
 		current->body = (uint8_t*)epb;
