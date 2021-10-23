@@ -200,14 +200,21 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 	case LIGHT_ENHANCED_PACKET_BLOCK:
 	{
 		struct _light_enhanced_packet_block* epb = NULL;
-
+		const uint32_t head_size = 32;
 		uint32_t len = *(uint32_t*)(local_data + 12);
 		if (swap_endianness) len = bswap32(len);
-		len = MIN(len, current->total_length - 32);
+		len = MIN(len, current->total_length - head_size);
 		uint32_t actual_len = 0;
 		PADD32(len, &actual_len);
 
 		epb = calloc(1, sizeof(struct _light_enhanced_packet_block) + actual_len);
+
+		if (current->total_length < head_size) {
+			// Don't try to read anything, block is invalid
+			current->body = (uint8_t*)epb;
+			return;
+		}
+
 		epb->interface_id = *(uint32_t*)local_data;
 		local_data += 4;
 		epb->timestamp_high = *(uint32_t*)local_data;
