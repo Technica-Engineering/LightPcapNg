@@ -87,7 +87,7 @@ jobs:
         run: |
           mkdir input
           cp pcaps/*.pcapng input
-          afl-fuzz -V 60 -i input -o output -e .pcapng -- build/tests/test_packets_dump @@ /dev/null
+          afl-fuzz -V 600 -i input -o output -e pcapng -- build/tests/test_packets_dump @@ /dev/null
           afl-stat.sh output/default
           cat output/default/fuzzer_stats
 
@@ -97,6 +97,8 @@ jobs:
       - run: |
           rename 's/:/_/g' output/default/crashes/*
           rename 's/:/_/g' output/default/hangs/*
+          rename 's/$/.pcapng/g' output/default/crashes/*
+          rename 's/$/.pcapng/g' output/default/hangs/*
         
       - name: Check
         # Remove non-empty dirs, if they are not empry rmdir will fail

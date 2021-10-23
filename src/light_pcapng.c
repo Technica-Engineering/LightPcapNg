@@ -86,45 +86,59 @@ static light_option __parse_options(const uint8_t** memory, const int32_t max_le
 	if (max_len <= 0) {
 		return NULL;
 	}
-	else {
-		light_option opt = calloc(1, sizeof(struct light_option_t));
-		uint16_t actual_length;
-		uint16_t allignment = sizeof(uint32_t);
-		uint16_t remaining_size;
-
-		opt->code = *(uint16_t*)*memory;
-		*memory += 2;
-		opt->length = *(uint16_t*)*memory;
-		*memory += 2;
-		fix_endianness_option(opt, swap_endianness);
-
-		actual_length = (opt->length % allignment) == 0 ?
-			opt->length :
-			(opt->length / allignment + 1) * allignment;
-
-		if (actual_length > 0) {
-			opt->data = calloc(1, actual_length);
-			memcpy(opt->data, *memory, actual_length);
-		}
-		*memory += actual_length;
-
-		remaining_size = max_len - actual_length - 4;
-
-		if (opt->code == 0) {
-			DCHECK_ASSERT(opt->length, 0);
-			DCHECK_ASSERT(remaining_size, 0);
-
-			if (remaining_size) {
-				// XXX: Treat the remaining data as garbage and discard it form the trace.
-				*memory += remaining_size;
-			}
-		}
-		else {
-			opt->next_option = __parse_options(memory, remaining_size, swap_endianness);
-		}
-
-		return opt;
+	// size of code and length
+	const int32_t header_size = sizeof(uint16_t) + sizeof(uint16_t);
+	const int32_t allignment = sizeof(uint32_t);
+	if (max_len < header_size) {
+		// Garbage data, not enough to read header
+		*memory += max_len;
+		return NULL;
 	}
+
+	light_option opt = calloc(1, sizeof(struct light_option_t));
+	
+	int32_t remaining_size = max_len;
+
+	opt->code = *(uint16_t*)*memory;
+	*memory += sizeof(uint16_t);
+	opt->length = *(uint16_t*)*memory;
+	*memory += sizeof(uint16_t);
+	remaining_size -= header_size;
+	fix_endianness_option(opt, swap_endianness);
+
+	int32_t actual_length = (opt->length % allignment) == 0 ?
+		opt->length :
+		(opt->length / allignment + 1) * allignment;
+
+	if (actual_length > remaining_size) {
+		// We got invalid length value
+		// Discard the option and the rest of the memory
+		free(opt);
+		*memory += remaining_size;
+		return NULL;
+	}
+
+	if (actual_length > 0) {
+		opt->data = calloc(1, actual_length);
+		memcpy(opt->data, *memory, actual_length);
+		*memory += actual_length;
+		remaining_size += actual_length;
+	}
+
+	if (opt->code == 0) {
+		DCHECK_ASSERT(opt->length, 0);
+		DCHECK_ASSERT(remaining_size, 0);
+
+		if (remaining_size) {
+			// XXX: Treat the remaining data as garbage and discard it form the trace.
+			*memory += remaining_size;
+		}
+	}
+	else {
+		opt->next_option = __parse_options(memory, remaining_size, swap_endianness);
+	}
+
+	return opt;
 }
 
 /// <summary>

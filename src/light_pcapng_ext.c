@@ -109,11 +109,7 @@ static void __append_interface_block(light_pcapng pcapng, const light_block inte
 	lif.description = __alloc_option_string(interface_block, 3);
 
 	ts_resolution_option = light_find_option(interface_block, LIGHT_OPTION_IF_TSRESOL);
-	if (ts_resolution_option == NULL)
-	{
-		lif.timestamp_resolution = 1000000;
-	}
-	else
+	if (ts_resolution_option && ts_resolution_option->length == sizeof(int8_t))
 	{
 		int8_t tsresol = *((int8_t*)ts_resolution_option->data);
 		if (tsresol >= 0)
@@ -124,6 +120,10 @@ static void __append_interface_block(light_pcapng pcapng, const light_block inte
 		{
 			lif.timestamp_resolution = __power_of(2, -tsresol);
 		}
+	}
+	else
+	{
+		lif.timestamp_resolution = 1000000;
 	}
 
 	pcapng->interfaces = realloc(pcapng->interfaces, sizeof(lif) * (pcapng->interfaces_count + 1));
@@ -382,7 +382,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 
 		packet_header->flags = 0;
 		light_option flags_opt = light_find_option(block, LIGHT_OPTION_EPB_FLAGS);
-		if (flags_opt != NULL)
+		if (flags_opt != NULL && flags_opt->length == sizeof(uint32_t))
 		{
 			packet_header->flags = *(uint32_t*)(flags_opt->data);
 			if (pcapng->swap_endianness) bswap32(packet_header->flags);
