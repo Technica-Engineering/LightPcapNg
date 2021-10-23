@@ -36,7 +36,7 @@ else()
     FetchContent_GetProperties(zstd POPULATED ZSTD_POPULATED)
     if(NOT ZSTD_POPULATED)
       FetchContent_Populate(zstd)
-      add_subdirectory(${zstd_SOURCE_DIR}/build/cmake ${zstd_BINARY_DIR})
+      add_subdirectory(${zstd_SOURCE_DIR}/build/cmake ${zstd_BINARY_DIR} EXCLUDE_FROM_ALL)
     endif()
 
     include_directories(${zstd_SOURCE_DIR}/lib)

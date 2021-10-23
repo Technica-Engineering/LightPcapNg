@@ -39,17 +39,18 @@ int main(int argc, const char** args) {
 	}
 
 	light_pcapng_file_info* info = light_pcang_get_file_info(infile);
-	fprintf(outfile, "version: %d.%d\n", info->major_version, info->minor_version);
-	fprintf(outfile, "comment: %s\n", info->comment);
-	fprintf(outfile, "os: %s\n", info->os_desc);
-	fprintf(outfile, "hardware: %s\n", info->hardware_desc);
-	fprintf(outfile, "app: %s\n", info->app_desc);
-	fprintf(outfile, "\n");
-
+	if (info) {
+		fprintf(outfile, "version: %d.%d\n", info->major_version, info->minor_version);
+		fprintf(outfile, "comment: %s\n", info->comment);
+		fprintf(outfile, "os: %s\n", info->os_desc);
+		fprintf(outfile, "hardware: %s\n", info->hardware_desc);
+		fprintf(outfile, "app: %s\n", info->app_desc);
+		fprintf(outfile, "\n");
+	}
 	int index = 1;
 
 	while (1) {
-		light_packet_interface pkt_interface;
+		light_packet_interface pkt_interface = { 0 };
 		light_packet_header pkt_header;
 		const uint8_t* pkt_data = NULL;
 		int res = 0;
