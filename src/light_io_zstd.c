@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifdef USE_ZSTD
+#ifdef LIGHT_USE_ZSTD
 
 #include "light_io.h"
 #include "light_io_internal.h"
@@ -316,4 +316,4 @@ light_file light_io_zstd_open(const char* filename, const char* mode)
 	
 	return fd;
 }
-#endif // USE_ZSTD
+#endif // LIGHT_USE_ZSTD

@@ -22,12 +22,12 @@
 #ifndef INCLUDE_LIGHT_IO_ZSTD_H_
 #define INCLUDE_LIGHT_IO_ZSTD_H_
 
-#if defined(USE_ZSTD)
+#if defined(LIGHT_USE_ZSTD)
 
 #include "light_io.h"
 
 light_file light_io_zstd_open(const char* filename, const char* mode);
 
-#endif // USE_ZSTD
+#endif // LIGHT_USE_ZSTD
 
 #endif // INCLUDE_LIGHT_IO_ZSTD_H_

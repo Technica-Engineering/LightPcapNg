@@ -49,7 +49,7 @@ light_file light_io_open(const char* filename, const char* mode)
 	}
 	const char* ext = get_filename_ext(filename);
 
-#if defined(USE_ZSTD)
+#if defined(LIGHT_USE_ZSTD)
 	if (strcasecmp(ext, ".zst") == 0) {
 		return light_io_zstd_open(filename, mode);
 	}
