@@ -4,7 +4,6 @@ add_library(light_zstd INTERFACE)
 
 # Try to find zstd in the cmake search path
 find_package(zstd QUIET)
-message("zstd: ${zstd_FOUND}")
 if(NOT zstd_FOUND)
   # zstd was not found, so we resolve our dependency by ourself
 
@@ -14,10 +13,7 @@ if(NOT zstd_FOUND)
   find_library(libzstd_static NAMES libzstd.a)
   find_library(libzstd_shared NAMES libzstd.so)
 
-  if(ZSTD_INCLUDE_DIRS AND libzstd_static AND libzstd_shared)
-    message("zstd: found library")
-    target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIRS}")
-  else()
+  if(NOT (ZSTD_INCLUDE_DIRS AND libzstd_static AND libzstd_shared))
     message("zstd: compiling")
     # compile library if not found
     include(FetchContent)
@@ -35,7 +31,7 @@ if(NOT zstd_FOUND)
       add_subdirectory("${zstd_SOURCE_DIR}/build/cmake" "${zstd_BINARY_DIR}" EXCLUDE_FROM_ALL)
     endif()
 
-    target_include_directories(light_zstd INTERFACE "${zstd_SOURCE_DIR}/lib")
+    set(ZSTD_INCLUDE_DIRS "${zstd_SOURCE_DIR}/lib")
   endif()
 endif()
 
@@ -58,5 +54,7 @@ else()
     endif()
 endif()
 
-message("LIBZSTD_TARGET= ${LIBZSTD_TARGET}")
 target_link_libraries(light_zstd INTERFACE "${LIBZSTD_TARGET}")
+if(ZSTD_INCLUDE_DIRS)
+    target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIRS}")
+endif()
