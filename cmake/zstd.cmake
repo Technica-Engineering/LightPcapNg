@@ -9,10 +9,13 @@ if(NOT zstd_FOUND)
 
   # try finding the library on the system with the traditional method 
   # (no cmake package on system)
+  find_path(ZSTD_INCLUDE_DIR zstd.h)
   find_library(libzstd_static NAMES libzstd.a)
   find_library(libzstd_shared NAMES libzstd.so)
 
-  if(NOT (libzstd_static AND libzstd_shared))
+  if(ZSTD_INCLUDE_DIR AND libzstd_static AND libzstd_shared)
+    target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIR}")
+  else()
     # compile library if not found
     include(FetchContent)
 
