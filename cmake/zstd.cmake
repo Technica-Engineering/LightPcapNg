@@ -7,6 +7,10 @@ function(zstd_libraries SHARED_LIB STATIC_LIB)
         target_link_libraries(light_zstd INTERFACE ${SHARED_LIB})
     else()
         target_link_libraries(light_zstd INTERFACE ${STATIC_LIB})
+        # this pthread linking is required for the static linking of certain zstd
+        # versions. See: https://github.com/facebook/zstd/pull/2097
+        find_package(Threads REQUIRED)
+        target_link_libraries(light_zstd INTERFACE ${CMAKE_THREAD_LIBS_INIT})
     endif()
 endfunction()
 
@@ -14,7 +18,7 @@ endfunction()
 find_package(zstd QUIET)
 if(zstd_FOUND)
     if(TARGET zstd::zstd)
-        # if dependency was resolved by conan (find_package generator)
+        # dependency was resolved by conan (find_package generator)
         target_link_libraries(light_zstd INTERFACE zstd::zstd)
     else()
         zstd_libraries(zstd::libzstd_shared zstd::libzstd_static)
@@ -51,11 +55,4 @@ if(NOT zstd_FOUND)
     endif()
     zstd_libraries(libzstd_shared libzstd_static)
     target_include_directories(light_zstd INTERFACE "${zstd_SOURCE_DIR}/lib")
-endif()
-
-if(NOT BUILD_SHARED_LIBS)
-    # this pthread linking is required for the static linking of certain zstd
-    # versions. See: https://github.com/facebook/zstd/pull/2097
-    find_package(Threads REQUIRED)
-    target_link_libraries(light_zstd INTERFACE ${CMAKE_THREAD_LIBS_INIT})
 endif()
