@@ -55,6 +55,6 @@ else()
 endif()
 
 target_link_libraries(light_zstd INTERFACE "${LIBZSTD_TARGET}")
-if(ZSTD_INCLUDE_DIRS)
+if(${ZSTD_INCLUDE_DIRS})
     target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIRS}")
 endif()
