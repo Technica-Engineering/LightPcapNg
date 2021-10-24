@@ -4,19 +4,19 @@ add_library(light_zstd INTERFACE)
 
 # Try to find zstd in the cmake search path
 find_package(zstd QUIET)
-message("zstd: found package")
+message("zstd: ${zstd_FOUND}")
 if(NOT zstd_FOUND)
   # zstd was not found, so we resolve our dependency by ourself
 
   # try finding the library on the system with the traditional method 
   # (no cmake package on system)
-  find_path(ZSTD_INCLUDE_DIR zstd.h)
+  find_path(ZSTD_INCLUDE_DIRS zstd.h)
   find_library(libzstd_static NAMES libzstd.a)
   find_library(libzstd_shared NAMES libzstd.so)
 
-  if(ZSTD_INCLUDE_DIR AND libzstd_static AND libzstd_shared)
+  if(ZSTD_INCLUDE_DIRS AND libzstd_static AND libzstd_shared)
     message("zstd: found library")
-    target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIR}")
+    target_include_directories(light_zstd INTERFACE "${ZSTD_INCLUDE_DIRS}")
   else()
     message("zstd: compiling")
     # compile library if not found
