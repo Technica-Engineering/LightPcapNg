@@ -5,7 +5,7 @@ project(light_pcapng C)
 # Configuration
 
 file(GLOB LIGHT_SOURCES "src/*.c")
-file(GLOB LIGHT_HEADERS "include/*.c")
+file(GLOB LIGHT_HEADERS "include/*.h")
 
 add_library(light_pcapng ${LIGHT_SOURCES})
 set_target_properties(light_pcapng PROPERTIES PUBLIC_HEADER
