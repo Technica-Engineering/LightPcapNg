@@ -8,9 +8,16 @@ endif()
 file(GLOB LIGHT_TESTS *.c)
 
 file(GLOB samples_pcapng "../pcaps/*.pcapng")
+set(samples_compressed "")
 
 if(LIGHT_USE_ZSTD)
-    file(GLOB samples_zsts "../pcaps/*.zst")
+    file(GLOB samples_zst "../pcaps/*.zst")
+    list (APPEND samples_compressed ${samples_zst})
+endif()
+
+if(LIGHT_USE_ZLIB)
+    file(GLOB samples_gz "../pcaps/*.gz")
+    list (APPEND samples_compressed ${samples_gz})
 endif()
 
 foreach(test_file ${LIGHT_TESTS})
@@ -20,7 +27,7 @@ foreach(test_file ${LIGHT_TESTS})
     target_link_libraries(${test_name} light_pcapng)
 endforeach()
 
-foreach(sample ${samples_pcapng} ${samples_zsts})
+foreach(sample ${samples_pcapng} ${samples_compressed})
     get_filename_component(param ${sample} NAME)
     string(REPLACE "." "_" param ${param})
     add_test(
