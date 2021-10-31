@@ -361,6 +361,9 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 	DCHECK_NULLP(local_data, goto failed);
 
 	if (section_header) {
+		if (bytesToRead < 16) {
+			goto failed;
+		}
 		// We already took the magic number
 		memcpy(local_data, &byte_order_magic, 4);
 		bytesRead = light_io_read(fd, local_data + 4, bytesToRead - 4);
