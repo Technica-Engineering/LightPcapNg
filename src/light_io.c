@@ -59,6 +59,7 @@ light_file light_io_open(const char* filename, const char* mode)
 		}
 		uint32_t signature;
 		if (fread(&signature, sizeof(signature), 1, file) != 1) {
+			fclose(file);
 			return NULL;
 		}
 		fclose(file);
