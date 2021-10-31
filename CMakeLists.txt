@@ -4,22 +4,12 @@ project(light_pcapng C)
 
 # Configuration
 
-file(GLOB LIGHT_SOURCES src/*.c)
-set(light_pcapng_HEADERS
-    include/light_io.h
-    include/light_export.h
-    include/light_io.h
-    include/light_io_file.h
-    include/light_io_mem.h
-    include/light_io_zstd.h
-    include/light_pcapng.h
-    include/light_pcapng_ext.h
-    include/light_special.h
-    include/light_util.h)
+file(GLOB LIGHT_SOURCES "src/*.c")
+file(GLOB LIGHT_HEADERS "include/*.h")
 
 add_library(light_pcapng ${LIGHT_SOURCES})
 set_target_properties(light_pcapng PROPERTIES PUBLIC_HEADER
-                                              "${light_pcapng_HEADERS}")
+                                              "${LIGHT_HEADERS}")
 
 target_include_directories(light_pcapng PUBLIC "include")
 # Export API symbols when the library is created
@@ -35,6 +25,8 @@ option(LIGHT_USE_ZSTD "Compile with ZSTD support" ON)
 
 if(LIGHT_USE_ZSTD)
   include(cmake/zstd.cmake)
+  add_definitions(-DLIGHT_USE_ZSTD)
+  target_link_libraries(light_pcapng light_zstd)
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
