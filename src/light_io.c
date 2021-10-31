@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 #if _WIN32
@@ -48,20 +49,55 @@ light_file light_io_open(const char* filename, const char* mode)
 	if (!filename) {
 		return NULL;
 	}
+	if (strchr(mode, 'r') != NULL)
+	{
+		// The mode request reading existing file
+		// We use magic number to detect what function to use
+		FILE* file = fopen(filename, mode);
+		if (!file) {
+			return NULL;
+		}
+		uint32_t signature;
+		if (fread(&signature, sizeof(signature), 1, file) != 1) {
+			return NULL;
+		}
+		fclose(file);
+		if (signature == 0x0a0d0d0a) {
+			return light_io_file_open(filename, mode);
+		}
+		if (signature == 0x28b52ffd || signature == 0x25b52ffd || signature == 0xfd2fb528) {
+#if defined(LIGHT_USE_ZSTD)
+			return light_io_zstd_open(filename, mode);
+#else
+			return NULL;
+#endif
+		}
+		if ((signature & 0xff000000) == 0x78000000) {
+#if defined(LIGHT_USE_ZSTD)
+			return light_io_zlib_open(filename, mode);
+#else
+			return NULL;
+#endif
+		}
+		// We can't tell what this file is, fallback to extention
+	}
 	const char* ext = get_filename_ext(filename);
 
-#if defined(LIGHT_USE_ZSTD)
 	if (strcasecmp(ext, ".zst") == 0) {
+#if defined(LIGHT_USE_ZSTD)
 		return light_io_zstd_open(filename, mode);
-	}
+#else
+		return NULL;
 #endif
+	}
 
-#if defined(LIGHT_USE_ZLIB)
 	if (strcasecmp(ext, ".gz") == 0) {
+#if defined(LIGHT_USE_ZLIB)
 		return light_io_zlib_open(filename, mode);
-	}
+#else
+		return NULL;
 #endif
-
+	}
 	return light_io_file_open(filename, mode);
 }
 
