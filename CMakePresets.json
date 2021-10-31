@@ -4,6 +4,7 @@
     {
       "name": "Release",
       "displayName": "Release Config",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "$penv{BUILD_SHARED_LIBS}"
@@ -11,6 +12,7 @@
     },
     {
       "name": "Debug",
+      "generator": "Ninja",
       "displayName": "Debug Config",
       "binaryDir": "${sourceDir}/build"
     }

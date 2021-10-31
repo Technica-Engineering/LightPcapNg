@@ -23,6 +23,7 @@
 #include "light_io_internal.h"
 #include "light_io_file.h"
 #include "light_io_zstd.h"
+#include "light_io_zlib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +53,12 @@ light_file light_io_open(const char* filename, const char* mode)
 #if defined(LIGHT_USE_ZSTD)
 	if (strcasecmp(ext, ".zst") == 0) {
 		return light_io_zstd_open(filename, mode);
+	}
+#endif
+
+#if defined(LIGHT_USE_ZLIB)
+	if (strcasecmp(ext, ".gz") == 0) {
+		return light_io_zlib_open(filename, mode);
 	}
 #endif
 

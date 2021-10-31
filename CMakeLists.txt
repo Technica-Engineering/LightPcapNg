@@ -29,6 +29,16 @@ if(LIGHT_USE_ZSTD)
   target_link_libraries(light_pcapng light_zstd)
 endif()
 
+# ZLIB
+
+option(LIGHT_USE_ZLIB "Compile with ZLIB support" ON)
+
+if(LIGHT_USE_ZLIB)
+  include(cmake/zlib.cmake)
+  add_definitions(-DLIGHT_USE_ZLIB)
+  target_link_libraries(light_pcapng light_zlib)
+endif()
+
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Testing
   include(CTest)

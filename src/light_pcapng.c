@@ -96,7 +96,7 @@ static light_option __parse_options(const uint8_t** memory, const int32_t max_le
 	}
 
 	light_option opt = calloc(1, sizeof(struct light_option_t));
-	
+
 	int32_t remaining_size = max_len;
 
 	opt->code = *(uint16_t*)*memory;
@@ -148,7 +148,7 @@ static light_option __parse_options(const uint8_t** memory, const int32_t max_le
 /// <param name="local_data">Pointer to data which constitutes block body</param>
 /// <param name="local_data">Pointer to data which constitutes block body</param>
 /// <param name="byte_order_magic">Used only for Section Headers since we need to look ahead</param>
-void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte_order_magic, const bool swap_endianness)
+void parse_by_type(light_block current, const uint8_t* local_data, const bool swap_endianness)
 {
 	const uint8_t* original_start = local_data;
 
@@ -158,20 +158,22 @@ void parse_by_type(light_block current, const uint8_t* local_data, uint32_t byte
 	{
 		struct _light_section_header* shb = calloc(1, sizeof(struct _light_section_header));
 
-		//shb->byteorder_magic = *(uint32_t*)local_data;
-		//local_data += 4;
-		shb->byteorder_magic = byte_order_magic;
+		shb->byteorder_magic = *(uint32_t*)local_data;
+		local_data += 4;
 		shb->major_version = *(uint16_t*)local_data;
 		local_data += 2;
 		shb->minor_version = *(uint16_t*)local_data;
 		local_data += 2;
-		shb->section_length = *((uint64_t*)local_data);
+		shb->section_length = *(uint64_t*)local_data;
 		local_data += 8;
 
 		fix_endianness_section_header(shb, swap_endianness);
 
+		assert(shb->major_version == 1);
+		assert(shb->minor_version == 0);
+
 		current->body = (uint8_t*)shb;
-		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8 + (size_t)4;
+		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8;
 		light_option opt = __parse_options(&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
 		current->options = opt;
 	}
@@ -301,24 +303,23 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 		light_free_block(*block);
 	}
 	*block = NULL;
-
-	light_block current;
+	light_block current = NULL;
+	uint8_t* local_data = NULL;
 
 	//See the block type, if end of file this will tell us
 	uint32_t blockType, blockSize;
 	size_t bytesRead;
 	bytesRead = light_io_read(fd, &blockType, sizeof(blockType));
-	bool section_header = (blockType == LIGHT_SECTION_HEADER_BLOCK);
-
 	if (bytesRead != sizeof(blockType))
 	{
-		current = NULL;
+		// Normal EOF, we did not allocate anything
 		return;
 	}
+	bool section_header = (blockType == LIGHT_SECTION_HEADER_BLOCK);
 
 	//A block remains to be read so allocate here
 	current = calloc(1, sizeof(struct light_block_t));
-	DCHECK_NULLP(current, return);
+	DCHECK_NULLP(current, goto failed);
 
 	//From here on if there is malformed block data we need to release the block we just allocated!
 
@@ -326,20 +327,18 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 	bytesRead = light_io_read(fd, &current->total_length, sizeof(blockSize));
 	if (bytesRead != sizeof(blockSize))
 	{
-		// EOF
-		free(current);
-		current = NULL;
-		return;
+		goto failed;
 	}
 
-	// Lets peek ahead and figure out the endianess.
 	uint32_t byte_order_magic = 0;
+	// Lets peek ahead and figure out the endianess.
 	if (section_header) {
 		assert(current->total_length != 0);
 		bytesRead = light_io_read(fd, &byte_order_magic, 4);
-		assert(bytesRead == 4);
-		bytesRead = light_io_seek(fd, -4L, SEEK_CUR);
-
+		if (bytesRead != sizeof(byte_order_magic))
+		{
+			goto failed;
+		}
 		*swap_endianness = (byte_order_magic != BYTE_ORDER_MAGIC);
 
 		if (*swap_endianness) {
@@ -358,18 +357,22 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 
 	//Pull out the block contents from the file
 	uint32_t bytesToRead = current->total_length - 2 * sizeof(blockSize) - sizeof(blockType);
+	local_data = calloc(bytesToRead, 1);
+	DCHECK_NULLP(local_data, goto failed);
+
 	if (section_header) {
-		bytesToRead -= 4;
+		// We already took the magic number
+		memcpy(local_data, &byte_order_magic, 4);
+		bytesRead = light_io_read(fd, local_data + 4, bytesToRead - 4);
+		bytesRead += 4;
 	}
-	uint8_t* local_data = calloc(bytesToRead, 1);
-	bytesRead = light_io_read(fd, local_data, bytesToRead);
+	else
+	{
+		bytesRead = light_io_read(fd, local_data, bytesToRead);
+	}
 	if (bytesRead != bytesToRead)
 	{
-		// EOF
-		free(current);
-		free(local_data);
-		current = NULL;
-		return;
+		goto failed;
 	}
 
 	//Need to move file to next record so read the footer, which is just the record length repeated
@@ -378,16 +381,19 @@ void light_read_block(light_file fd, light_block* block, bool* swap_endianness)
 	//Verify the two sizes match!!
 	if (blockSize != current->total_length || bytesRead != sizeof(blockSize))
 	{
-		free(current);
-		free(local_data);
-		current = NULL;
-		return;
+		goto failed;
 	}
 
-	parse_by_type(current, local_data, byte_order_magic, *swap_endianness);
+	parse_by_type(current, local_data, *swap_endianness);
 
 	free(local_data);
 	*block = current;
+	return;
+
+failed:
+	// An unexpected EOF took place, or memory allocation failed
+	free(current);
+	free(local_data);
 }
 
 static void __free_option(light_option option)
