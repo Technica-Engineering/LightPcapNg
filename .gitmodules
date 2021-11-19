@@ -1,0 +1,3 @@
+[submodule "pcapng-test-generator"]
+	path = pcapng-test-generator
+	url = https://github.com/hadrielk/pcapng-test-generator.git

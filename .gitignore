@@ -13,3 +13,5 @@
 *.tmp
 /.vs
 /out
+
+CMakeUserPresets.json

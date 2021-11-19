@@ -71,6 +71,8 @@ jobs:
     steps:
       - run: mkdir /src && cd /src
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Install
         run: |
           apt-get update
@@ -82,12 +84,15 @@ jobs:
           cmake --preset Release -DCMAKE_C_COMPILER=afl-cc -DCMAKE_CXX_COMPILER=afl-c++
           cmake --build --parallel --preset Release
       - name: Fuzz
-        # Fuzz for 60 seconds, until we fix the bugs we have
+        # Fuzz for 5 hours, otherwise GitHub will kill us once 6 hours elapsed
         # Fuuz only pcapng files for now
         run: |
-          mkdir input
-          cp pcaps/*.pcapng input
-          afl-fuzz -V 600 -i input -o output -e pcapng -- build/tests/test_packets_dump @@ /dev/null
+          mkdir candidates
+          cp pcaps/*.pcapng candidates
+          cp pcapng-test-generator/output_be/*/*.pcapng candidates
+          afl-cmin -i candidates -o input -- build/tests/test_packets_dump @@ /dev/null
+          ls -l input
+          afl-fuzz -V 18000 -i input -o output -e pcapng -- build/tests/test_packets_dump @@ /dev/null
           afl-stat.sh output/default
           cat output/default/fuzzer_stats
 
