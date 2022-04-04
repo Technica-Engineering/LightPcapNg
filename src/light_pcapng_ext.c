@@ -445,7 +445,6 @@ uint8_t get_timestamp_resolution_precision(uint64_t timestamp_resolution) {
 	return precision;
 }
 
-
 int light_write_interface_block(light_pcapng pcapng, const light_packet_interface * packet_interface)
 {
         struct _light_interface_description_block interface_block = { 0 };
@@ -463,14 +462,14 @@ int light_write_interface_block(light_pcapng pcapng, const light_packet_interfac
         // if packet interface has a name, add it to the light options
         if (packet_interface->name)
         {
-                light_option name_option = light_create_option(2, strlen(packet_interface->name), packet_interface->name);
+                light_option name_option = light_create_option(2, strlen(packet_interface->name) + 1, packet_interface->name);
                 light_add_option(NULL, iface_block_pcapng, name_option, false);
         }
 
         // if packet interface has a description, add it to the light options
         if (packet_interface->description)
         {
-                light_option description_option = light_create_option(3, strlen(packet_interface->description), packet_interface->description);
+                light_option description_option = light_create_option(3, strlen(packet_interface->description) + 1, packet_interface->description);
                 light_add_option(NULL, iface_block_pcapng, description_option, false);
         }
 
@@ -511,36 +510,7 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 	// in case interface ID of packet block to be written does not exist - was not read previously
 	if (iface_id >= pcapng->interfaces_count)
 	{
-		struct _light_interface_description_block interface_block = { 0 };
-		interface_block.link_type = packet_interface->link_type;
-
-		light_block iface_block_pcapng = light_create_block(LIGHT_INTERFACE_BLOCK, (const uint32_t*)&interface_block, sizeof(struct _light_interface_description_block) + 3 * sizeof(uint32_t));
-
-		if (packet_interface->timestamp_resolution) {
-			// get precision from timestamp resolution (number of 0s)
-			uint8_t timestamp_precision = get_timestamp_resolution_precision(packet_interface->timestamp_resolution);
-			// add precision to options
-			light_option resolution_option = light_create_option(LIGHT_OPTION_IF_TSRESOL, sizeof(timestamp_precision), (uint8_t*)&timestamp_precision);
-			light_add_option(NULL, iface_block_pcapng, resolution_option, false);
-		}
-		// if packet interface has a name, add it to the light options
-		if (packet_interface->name)
-		{
-			light_option name_option = light_create_option(2, strlen(packet_interface->name) + 1, packet_interface->name);
-			light_add_option(NULL, iface_block_pcapng, name_option, false);
-		}
-
-		// if packet interface has a description, add it to the light options
-		if (packet_interface->description)
-		{
-			light_option description_option = light_create_option(3, strlen(packet_interface->description) + 1, packet_interface->description);
-			light_add_option(NULL, iface_block_pcapng, description_option, false);
-		}
-
-		__append_interface_block(pcapng, iface_block_pcapng, false);
-		light_write_block(pcapng->file, iface_block_pcapng);
-
-		light_free_block(iface_block_pcapng);
+                light_write_interface_block(pcapng, packet_interface);
 	}
 
 	size_t option_size = sizeof(struct _light_enhanced_packet_block) + packet_header->captured_length;
