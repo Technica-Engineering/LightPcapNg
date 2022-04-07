@@ -87,6 +87,8 @@ LIGHT_API int LIGHT_API_CALL light_read_packet(light_pcapng pcapng, light_packet
 
 LIGHT_API int LIGHT_API_CALL light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header *packet_header, const uint8_t *packet_data);
 
+LIGHT_API int LIGHT_API_CALL light_write_interface_block(light_pcapng pcapng, const light_packet_interface* packet_interface);
+
 LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_flush(light_pcapng pcapng);
