@@ -521,7 +521,8 @@ int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet
 	epb->interface_id = iface_id;
 
 	struct timespec ts = packet_header->timestamp;
-	uint64_t timestamp = ts.tv_sec * (uint64_t)1e9 + (uint64_t)ts.tv_nsec;
+	uint64_t timestamp_scale = (uint64_t)1e9 / (packet_interface->timestamp_resolution ? packet_interface->timestamp_resolution : 1000000);
+	uint64_t timestamp = (ts.tv_sec * (uint64_t)1e9 + (uint64_t)ts.tv_nsec) / timestamp_scale;
 
 	epb->timestamp_high = timestamp >> 32;
 	epb->timestamp_low = timestamp & 0xFFFFFFFF;
