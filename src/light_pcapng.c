@@ -127,12 +127,8 @@ static light_option __parse_options(const uint8_t** memory, const int32_t max_le
 
 	if (opt->code == 0) {
 		DCHECK_ASSERT(opt->length, 0);
-		DCHECK_ASSERT(remaining_size, 0);
-
-		if (remaining_size) {
-			// XXX: Treat the remaining data as garbage and discard it form the trace.
-			*memory += remaining_size;
-		}
+		// Treat the remaining data as garbage and discard it
+		*memory += remaining_size;
 	}
 	else {
 		opt->next_option = __parse_options(memory, remaining_size, swap_endianness);
