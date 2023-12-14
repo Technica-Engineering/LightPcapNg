@@ -107,7 +107,7 @@ jobs:
           rmdir output/default/crashes
           rmdir output/default/hangs
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: fuzz
