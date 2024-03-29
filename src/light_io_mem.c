@@ -67,10 +67,13 @@ int light_mem_seek(void* context, long int offset, int origin)
 	{
 	case SEEK_SET:
 		new_offset = offset;
+		break;
 	case	SEEK_CUR:
 		new_offset += offset;
+		break;
 	case	SEEK_END:
 		new_offset = mem->size + offset;
+		break;
 	}
 	if (new_offset < 0 || new_offset > mem->size) {
 		return 1;
