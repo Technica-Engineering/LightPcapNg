@@ -42,6 +42,7 @@ typedef struct light_pcapng_t* light_pcapng;
 
 typedef struct light_packet_interface {
 	uint16_t link_type;
+	uint32_t interface_id;
 	char* name;
 	char* description;
 	uint64_t timestamp_resolution;

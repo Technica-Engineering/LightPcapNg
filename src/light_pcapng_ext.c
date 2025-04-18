@@ -366,6 +366,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		timestamp += epb->timestamp_low;
 
 		__get_interface(pcapng, pcapng->section_interface_offset + epb->interface_id, packet_interface);
+		packet_interface->interface_id = epb->interface_id;
 		// Default value in case of corrupt PCAPNG without interface
 		uint64_t ts_res = packet_interface->timestamp_resolution;
 		if (!ts_res)
