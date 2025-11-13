@@ -48,7 +48,9 @@ light_file light_io_open(const char* filename, const char* mode)
 	if (!filename) {
 		return NULL;
 	}
+#if defined(LIGHT_USE_ZSTD) || defined(LIGHT_USE_ZLIB)
 	const char* ext = get_filename_ext(filename);
+#endif
 
 #if defined(LIGHT_USE_ZSTD)
 	if (strcasecmp(ext, ".zst") == 0) {

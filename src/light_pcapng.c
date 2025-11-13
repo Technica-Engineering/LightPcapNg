@@ -416,14 +416,6 @@ void light_free_block(light_block block)
 	}
 }
 
-static int __option_count(light_option option)
-{
-	if (option == NULL)
-		return 0;
-
-	return 1 + __option_count(option->next_option);
-}
-
 uint32_t* __options_to_mem(const light_option option, size_t* size)
 {
 	if (option == NULL) {

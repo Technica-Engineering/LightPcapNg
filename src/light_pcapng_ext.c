@@ -439,8 +439,6 @@ int safe_strcmp(char const* str1, char const* str2) {
 	return strcmp(str1, str2);
 }
 
-static const uint8_t NSEC_PRECISION = 9;
-
 uint8_t get_timestamp_resolution_precision(uint64_t timestamp_resolution) {
 	uint64_t time_value = timestamp_resolution;
 	uint8_t precision = 0;
