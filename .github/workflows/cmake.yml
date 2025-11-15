@@ -17,56 +17,56 @@ jobs:
     env:
       BUILD_SHARED_LIBS: ${{matrix.shared}}
     steps:
-    - uses: actions/checkout@v4
-    - uses: lukka/get-cmake@latest
-    - name: Build
-      run: |
-        cmake --preset Release
-        cmake --build --parallel --preset Release
-    - name: Test
-      working-directory: build
-      run: ctest -C Release --output-on-failure
-    - name: Post Test
-      run: git diff --exit-code
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+      - name: Build
+        run: |
+          cmake --preset Release
+          cmake --build --parallel --preset Release
+      - name: Test
+        working-directory: build
+        run: ctest -C Release --output-on-failure
+      - name: Post Test
+        run: git diff --exit-code
 
   memcheck:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: lukka/get-cmake@latest
-    - name: Build
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y valgrind
-        cmake --preset Debug
-        cmake --build --parallel --preset Debug
-    - name: Test
-      working-directory: build
-      run: |
-        ctest -T memcheck --overwrite MemoryCheckCommandOptions="--leak-check=full --show-leak-kinds=all --error-exitcode=100"
-        awk 'FNR==1 {print "\n\n\n\n\n\t", FILENAME, "\n"}{print}' Testing/Temporary/MemoryChecker.*.log
-    - name: Post Test
-      run: git diff --exit-code
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+      - name: Build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          cmake --preset Debug
+          cmake --build --parallel --preset Debug
+      - name: Test
+        working-directory: build
+        run: |
+          ctest -T memcheck --overwrite MemoryCheckCommandOptions="--leak-check=full --show-leak-kinds=all --error-exitcode=100"
+          awk 'FNR==1 {print "\n\n\n\n\n\t", FILENAME, "\n"}{print}' Testing/Temporary/MemoryChecker.*.log
+      - name: Post Test
+        run: git diff --exit-code
 
   coverage:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: lukka/get-cmake@latest
-    - name: Build
-      run: |
-        cmake --preset Debug -DBUILD_COVERAGE=ON
-        cmake --build --parallel --preset Debug
-    - name: Test
-      working-directory: build
-      run: ctest -T test -T coverage
-    - name: Post Test
-      run: git diff --exit-code
-    - uses: codecov/codecov-action@v4
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+      - name: Build
+        run: |
+          cmake --preset Debug -DBUILD_COVERAGE=ON
+          cmake --build --parallel --preset Debug
+      - name: Test
+        working-directory: build
+        run: ctest -T test -T coverage
+      - name: Post Test
+        run: git diff --exit-code
+      - uses: codecov/codecov-action@v4
 
   fuzz:
     runs-on: ubuntu-latest
-    container: aflplusplus/aflplusplus
+    container: aflplusplus/aflplusplus:v4.34c
     env:
       AFL_SKIP_CPUFREQ: 1
     steps:
@@ -100,7 +100,7 @@ jobs:
           rename 's/:/_/g' output/default/hangs/*
           rename 's/$/.pcapng/g' output/default/crashes/*
           rename 's/$/.pcapng/g' output/default/hangs/*
-        
+
       - name: Check
         # Remove non-empty dirs, if they are not empry rmdir will fail
         run: |
