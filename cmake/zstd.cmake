@@ -25,7 +25,7 @@ if(zstd_FOUND)
     endif()
 else()
     # zstd was not found, so we do not resolve our dependency by ourself
-    # try finding the library on the system with the traditional method 
+    # try finding the library on the system with the traditional method
     # (no cmake package on system)
     find_path(ZSTD_INCLUDE_DIRS zstd.h)
     find_library(ZSTD_STATIC_LIB NAMES libzstd.a)
@@ -45,14 +45,11 @@ if(NOT zstd_FOUND)
     FetchContent_Declare(
         zstd
         GIT_REPOSITORY https://github.com/facebook/zstd.git
-        GIT_TAG v1.5.0)
+        # We need a version with top level CMakeLists.txt file
+        # No tag have it yet, so use this commit
+        GIT_TAG 448cd34
+    )
+    FetchContent_MakeAvailable(zstd)
 
-    FetchContent_GetProperties(zstd POPULATED ZSTD_POPULATED)
-
-    if(NOT ZSTD_POPULATED)
-        FetchContent_Populate(zstd)
-        add_subdirectory("${zstd_SOURCE_DIR}/build/cmake" "${zstd_BINARY_DIR}" EXCLUDE_FROM_ALL)
-    endif()
     zstd_libraries(libzstd_shared libzstd_static)
-    target_include_directories(light_zstd INTERFACE "${zstd_SOURCE_DIR}/lib")
 endif()
