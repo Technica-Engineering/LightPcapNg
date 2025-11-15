@@ -62,7 +62,7 @@ jobs:
         run: ctest -T test -T coverage
       - name: Post Test
         run: git diff --exit-code
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
 
   fuzz:
     runs-on: ubuntu-latest
