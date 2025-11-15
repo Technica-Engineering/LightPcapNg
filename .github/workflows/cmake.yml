@@ -17,7 +17,7 @@ jobs:
     env:
       BUILD_SHARED_LIBS: ${{matrix.shared}}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: lukka/get-cmake@latest
       - name: Build
         run: |
@@ -32,7 +32,7 @@ jobs:
   memcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: lukka/get-cmake@latest
       - name: Build
         run: |
@@ -51,7 +51,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: lukka/get-cmake@latest
       - name: Build
         run: |
@@ -71,7 +71,7 @@ jobs:
       AFL_SKIP_CPUFREQ: 1
     steps:
       - run: mkdir /src && cd /src
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install
         run: |
           apt-get update
