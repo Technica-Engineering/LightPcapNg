@@ -385,7 +385,9 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		if (flags_opt != NULL && flags_opt->length == sizeof(uint32_t))
 		{
 			packet_header->flags = *(uint32_t*)(flags_opt->data);
-			if (pcapng->swap_endianness) bswap32(packet_header->flags);
+			if (pcapng->swap_endianness) {
+				packet_header->flags = bswap32(packet_header->flags);
+			}
 		}
 
 		packet_header->dropcount = 0;
@@ -393,7 +395,9 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		if (dropcount_opt != NULL && dropcount_opt->length != 0)
 		{
 			packet_header->dropcount = *(uint64_t*)(dropcount_opt->data);
-			if (pcapng->swap_endianness) bswap64(packet_header->dropcount);
+			if (pcapng->swap_endianness) {
+				packet_header->dropcount = bswap64(packet_header->dropcount);
+			}
 		}
 
 		packet_header->queue = 0;
@@ -401,7 +405,9 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		if (queue_opt != NULL && queue_opt->length != 0)
 		{
 			packet_header->queue = *(uint32_t*)(queue_opt->data);
-			if (pcapng->swap_endianness) bswap32(packet_header->queue);
+			if (pcapng->swap_endianness) {
+				packet_header->queue = bswap32(packet_header->queue);
+			}
 		}
 
 		*packet_data = epb->packet_data;
@@ -432,8 +438,6 @@ int safe_strcmp(char const* str1, char const* str2) {
 	}
 	return strcmp(str1, str2);
 }
-
-static const uint8_t NSEC_PRECISION = 9;
 
 uint8_t get_timestamp_resolution_precision(uint64_t timestamp_resolution) {
 	uint64_t time_value = timestamp_resolution;
