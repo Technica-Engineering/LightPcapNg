@@ -42,6 +42,12 @@ int light_file_seek(void* context, long int offset, int origin)
 	return fseek(file, offset, origin);
 }
 
+long light_file_tell(void* context)
+{
+	FILE* file = context;
+	return ftell(file);
+}
+
 int light_file_flush(void* context)
 {
 	FILE* file = context;
@@ -71,6 +77,8 @@ light_file light_io_file_create(FILE* file)
 	fd->fn_read = &light_file_read;
 	fd->fn_write = &light_file_write;
 	fd->fn_flush = &light_file_flush;
+	fd->fn_seek = &light_file_seek;
+	fd->fn_tell = &light_file_tell;
 	fd->fn_close = &light_file_close;
 	return fd;
 }
