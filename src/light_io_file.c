@@ -71,6 +71,7 @@ light_file light_io_file_create(FILE* file)
 	fd->fn_read = &light_file_read;
 	fd->fn_write = &light_file_write;
 	fd->fn_flush = &light_file_flush;
+	fd->fn_seek = &light_file_seek;
 	fd->fn_close = &light_file_close;
 	return fd;
 }
