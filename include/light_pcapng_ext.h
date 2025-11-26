@@ -93,6 +93,8 @@ LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_flush(light_pcapng pcapng);
 
+LIGHT_API long LIGHT_API_CALL light_pcapng_tell(light_pcapng pcapng);
+
 #ifdef __cplusplus
 }
 #endif

@@ -596,3 +596,8 @@ int light_pcapng_flush(light_pcapng pcapng)
 {
 	return light_io_flush(pcapng->file);
 }
+
+long light_pcapng_tell(light_pcapng pcapng)
+{
+	return light_io_tell(pcapng->file);
+}

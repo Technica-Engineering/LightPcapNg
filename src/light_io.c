@@ -91,6 +91,14 @@ int light_io_seek(light_file fd, long int offset, int origin)
 	return fd->fn_seek(fd->context, offset, origin);
 }
 
+long light_io_tell(light_file fd)
+{
+	if (fd->fn_tell == NULL) {
+		return -1;
+	}
+	return fd->fn_tell(fd->context);
+}
+
 int light_io_flush(light_file fd)
 {
 	if (fd->fn_flush == NULL) {
