@@ -31,7 +31,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#ifdef _WIN32  
+#ifdef _WIN32
 #include <time.h>
 #else
 #include <sys/time.h>
@@ -93,7 +93,7 @@ LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_flush(light_pcapng pcapng);
 
-LIGHT_API long LIGHT_API_CALL light_pcapng_tell(light_pcapng pcapng);
+LIGHT_API int64_t LIGHT_API_CALL light_pcapng_offset(light_pcapng pcapng);
 
 #ifdef __cplusplus
 }

@@ -597,7 +597,7 @@ int light_pcapng_flush(light_pcapng pcapng)
 	return light_io_flush(pcapng->file);
 }
 
-long light_pcapng_tell(light_pcapng pcapng)
+int64_t light_pcapng_offset(light_pcapng pcapng)
 {
-	return light_io_tell(pcapng->file);
+	return light_io_offset(pcapng->file);
 }

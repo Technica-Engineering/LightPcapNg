@@ -214,11 +214,11 @@ size_t light_zstd_write(void* context, const void* buf, size_t count)
 	return count;
 }
 
-long light_zstd_tell_w(void* context)
+int64_t light_zstd_offset_w(void* context)
 {
 	struct zstd_compression_t* compression = context;
 
-	return ftell(compression->file);
+	return ftello64(compression->file);
 }
 
 int light_zstd_flush_w(void* context)
@@ -254,11 +254,11 @@ int light_zstd_close_w(void* context)
 	return res;
 }
 
-long light_zstd_tell_r(void* context)
+int64_t light_zstd_offset_r(void* context)
 {
 	struct zstd_decompression_t* decompression = context;
 
-	return ftell(decompression->file);
+	return ftello64(decompression->file);
 }
 
 int light_zstd_close_r(void* context)
@@ -327,13 +327,13 @@ light_file light_io_zstd_open(const char* filename, const char* mode)
 	if (read) {
 		fd->context = get_zstd_decompression_context(file);
 		fd->fn_read = &light_zstd_read;
-		fd->fn_tell = &light_zstd_tell_r;
+		fd->fn_offset = &light_zstd_offset_r;
 		fd->fn_close = &light_zstd_close_r;
 	}
 	else {
 		fd->context = get_zstd_compression_context(file, compression_level);
 		fd->fn_write = &light_zstd_write;
-		fd->fn_tell = &light_zstd_tell_w;
+		fd->fn_offset = &light_zstd_offset_w;
 		fd->fn_flush = &light_zstd_flush_w;
 		fd->fn_close = &light_zstd_close_w;
 	}

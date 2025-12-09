@@ -59,7 +59,7 @@ size_t light_mem_write(void* context, const void* buf, size_t count)
 	return len;
 }
 
-int light_mem_seek(void* context, long int offset, int origin)
+int64_t light_mem_seek(void* context, int64_t offset, int origin)
 {
 	mem_context* mem = context;
 	size_t new_offset = -1;
@@ -80,6 +80,13 @@ int light_mem_seek(void* context, long int offset, int origin)
 	}
 	mem->offset = new_offset;
 	return 0;
+}
+
+int64_t light_mem_offset(void* context)
+{
+	mem_context* mem = context;
+
+	return mem->offset;
 }
 
 int light_mem_flush(void* context)
@@ -107,6 +114,8 @@ light_file light_io_mem_create(void* memory, size_t size)
 	fd->context = mem;
 	fd->fn_read = &light_mem_read;
 	fd->fn_write = &light_mem_write;
+	fd->fn_seek = &light_mem_seek;
+	fd->fn_offset = &light_mem_offset;
 	fd->fn_flush = &light_mem_flush;
 	fd->fn_close = &light_mem_close;
 	return fd;

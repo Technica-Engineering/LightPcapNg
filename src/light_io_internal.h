@@ -23,12 +23,13 @@
 #define INCLUDE_LIGHT_IO_INTERNAL_H_
 
 #include "light_io.h"
-#include <stdio.h> 
+#include <stdio.h>
+#include <stdint.h>
 
 typedef size_t(*light_fn_read)(void* context, void* buf, size_t count);
 typedef size_t(*light_fn_write)(void* context, const void* buf, size_t count);
-typedef int(*light_fn_seek)(void* context, long int offset, int origin);
-typedef long(*light_fn_tell)(void* context);
+typedef int64_t(*light_fn_seek)(void* context, int64_t offset, int origin);
+typedef int64_t(*light_fn_offset)(void* context);
 typedef int(*light_fn_flush)(void* context);
 typedef int(*light_fn_close)(void* context);
 
@@ -39,7 +40,7 @@ struct light_file_t
 	light_fn_read fn_read;
 	light_fn_write fn_write;
 	light_fn_seek fn_seek;
-	light_fn_tell fn_tell;
+	light_fn_offset fn_offset;
 	light_fn_flush fn_flush;
 	light_fn_close fn_close;
 };
