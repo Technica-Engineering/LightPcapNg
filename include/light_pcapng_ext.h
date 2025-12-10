@@ -30,6 +30,7 @@ extern "C" {
 #include "light_io.h"
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #ifdef _WIN32
 #include <time.h>
@@ -93,7 +94,7 @@ LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_flush(light_pcapng pcapng);
 
-LIGHT_API int64_t LIGHT_API_CALL light_pcapng_offset(light_pcapng pcapng);
+LIGHT_API off_t LIGHT_API_CALL light_pcapng_offset(light_pcapng pcapng);
 
 #ifdef __cplusplus
 }

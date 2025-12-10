@@ -83,7 +83,7 @@ size_t light_io_write(light_file fd, const void* buf, size_t count)
 	return fd->fn_write(fd->context, buf, count);
 }
 
-int64_t light_io_seek(light_file fd, int64_t offset, int origin)
+int light_io_seek(light_file fd, off_t offset, int origin)
 {
 	if (fd->fn_seek == NULL) {
 		return -1;
@@ -91,7 +91,7 @@ int64_t light_io_seek(light_file fd, int64_t offset, int origin)
 	return fd->fn_seek(fd->context, offset, origin);
 }
 
-int64_t light_io_offset(light_file fd)
+off_t light_io_offset(light_file fd)
 {
 	if (fd->fn_offset == NULL) {
 		return -1;

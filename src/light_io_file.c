@@ -36,16 +36,16 @@ size_t light_file_write(void* context, const void* buf, size_t count)
 	return fwrite(buf, 1, count, file);
 }
 
-int64_t light_file_seek(void* context, int64_t offset, int origin)
+int light_file_seek(void* context, off_t offset, int origin)
 {
 	FILE* file = context;
-	return fseeko64(file, offset, origin);
+	return fseeko(file, offset, origin);
 }
 
-int64_t light_file_offset(void* context)
+off_t light_file_offset(void* context)
 {
 	FILE* file = context;
-	return ftello64(file);
+	return ftello(file);
 }
 
 int light_file_flush(void* context)

@@ -214,11 +214,11 @@ size_t light_zstd_write(void* context, const void* buf, size_t count)
 	return count;
 }
 
-int64_t light_zstd_offset_w(void* context)
+off_t light_zstd_offset_w(void* context)
 {
 	struct zstd_compression_t* compression = context;
 
-	return ftello64(compression->file);
+	return ftello(compression->file);
 }
 
 int light_zstd_flush_w(void* context)
@@ -254,11 +254,11 @@ int light_zstd_close_w(void* context)
 	return res;
 }
 
-int64_t light_zstd_offset_r(void* context)
+off_t light_zstd_offset_r(void* context)
 {
 	struct zstd_decompression_t* decompression = context;
 
-	return ftello64(decompression->file);
+	return ftello(decompression->file);
 }
 
 int light_zstd_close_r(void* context)

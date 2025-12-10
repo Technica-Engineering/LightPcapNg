@@ -34,8 +34,8 @@ LIGHT_API light_file LIGHT_API_CALL light_io_open(const char* file_name, const c
 LIGHT_API size_t LIGHT_API_CALL light_io_read(light_file fd, void* buf, size_t count);
 LIGHT_API size_t LIGHT_API_CALL light_io_write(light_file fd, const void* buf, size_t count);
 
-LIGHT_API int64_t LIGHT_API_CALL light_io_seek(light_file fd, int64_t offset, int origin);
-LIGHT_API int64_t LIGHT_API_CALL light_io_offset(light_file fd);
+LIGHT_API int LIGHT_API_CALL light_io_seek(light_file fd, off_t offset, int origin);
+LIGHT_API off_t LIGHT_API_CALL light_io_offset(light_file fd);
 LIGHT_API int LIGHT_API_CALL light_io_flush(light_file fd);
 LIGHT_API int LIGHT_API_CALL light_io_close(light_file fd);
 

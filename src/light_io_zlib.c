@@ -25,14 +25,14 @@ int light_zlib_flush(void* context)
 	return gzflush((gzFile)context, Z_NO_FLUSH);
 }
 
-int64_t light_zlib_seek(void* context, int64_t offset, int origin)
+int light_zlib_seek(void* context, off_t offset, int origin)
 {
-	return gzseek64((gzFile)context, offset, origin);
+	return gzseek((gzFile)context, offset, origin);
 }
 
-int64_t light_zlib_offset(void* context)
+off_t light_zlib_offset(void* context)
 {
-	return gzoffset64((gzFile)context);
+	return gzoffset((gzFile)context);
 }
 
 int light_zlib_close(void* context)
