@@ -32,10 +32,15 @@ extern "C" {
 
 	// block types
 
-#define LIGHT_SECTION_HEADER_BLOCK  0x0A0D0D0A
-#define LIGHT_INTERFACE_BLOCK       0x00000001
-#define LIGHT_ENHANCED_PACKET_BLOCK 0x00000006
-#define LIGHT_SIMPLE_PACKET_BLOCK   0x00000003
+#define LIGHT_SECTION_HEADER_BLOCK       0x0A0D0D0A
+#define LIGHT_INTERFACE_BLOCK            0x00000001
+#define LIGHT_ENHANCED_PACKET_BLOCK      0x00000006
+#define LIGHT_SIMPLE_PACKET_BLOCK        0x00000003
+#define LIGHT_NAME_RESOLUTION_BLOCK      0x00000004
+#define LIGHT_INTERFACE_STATISTICS_BLOCK 0x00000005
+#define LIGHT_DECRYPTION_SECRETS_BLOCK   0x0000000A
+#define LIGHT_CUSTOM_BLOCK_1             0x00000BAD
+#define LIGHT_CUSTOM_BLOCK_2             0x40000BAD
 
 // option codes
 
@@ -43,11 +48,32 @@ extern "C" {
 #define LIGHT_OPTION_SHB_HARDWARE          2
 #define LIGHT_OPTION_SHB_OS                3
 #define LIGHT_OPTION_SHB_APP               4
+
+#define LIGHT_OPTION_IF_NAME               2
+#define LIGHT_OPTION_IF_DESCRIPTION        3
+#define LIGHT_OPTION_IF_IPV4ADDR           4
+#define LIGHT_OPTION_IF_IPV6ADDR           5
+#define LIGHT_OPTION_IF_MACADDR            6
+#define LIGHT_OPTION_IF_EUIADDR            7
+#define LIGHT_OPTION_IF_SPEED              8
 #define LIGHT_OPTION_IF_TSRESOL            9
+#define LIGHT_OPTION_IF_TZONE              10
+#define LIGHT_OPTION_IF_FILTER             11
+#define LIGHT_OPTION_IF_OS                 12
+#define LIGHT_OPTION_IF_FCSLEN             13
+#define LIGHT_OPTION_IF_TSOFFSET           14
+#define LIGHT_OPTION_IF_HARDWARE           15
+#define LIGHT_OPTION_IF_TXSPEED            16
+#define LIGHT_OPTION_IF_RXSPEED            17
+#define LIGHT_OPTION_IF_IANA_TZNAME        18
 
 #define LIGHT_OPTION_EPB_FLAGS             2
+#define LIGHT_OPTION_EPB_HASH              3
 #define LIGHT_OPTION_EPB_DROPCOUNT         4
+#define LIGHT_OPTION_EPB_PACKETID          5
 #define LIGHT_OPTION_EPB_QUEUE             6
+#define LIGHT_OPTION_EPB_VERDICT           7
+#define LIGHT_OPTION_EPB_PID_TID           8
 
 #define BYTE_ORDER_MAGIC            0x1A2B3C4D
 
