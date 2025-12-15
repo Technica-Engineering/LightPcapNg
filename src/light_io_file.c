@@ -41,7 +41,7 @@ static int64_t light_file_seek(void* context, int64_t offset, int origin)
 	FILE* file = context;
 #if _WIN32
 	return _fseeki64(file, offset, origin);
-#elif defined(HAVE_FSEEKO64)
+#elif (HAVE_FSEEKO64 + 0)
 	return fseeko64(file, offset, origin);
 #else
 	return fseek(file, offset, origin);
