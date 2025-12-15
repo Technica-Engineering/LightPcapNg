@@ -19,13 +19,17 @@ if(BUILD_SHARED_LIBS)
   target_compile_definitions(light_pcapng PUBLIC LIGHT_IMPORTS=1)
 endif()
 
+include(CheckSymbolExists)
+check_symbol_exists(fseeko64 "stdio.h" HAVE_FSEEKO64)
+target_compile_definitions(light_pcapng PRIVATE "HAVE_FSEEKO64=${HAVE_FSEEKO64}")
+
 # ZSTD
 
 option(LIGHT_USE_ZSTD "Compile with ZSTD support" ON)
 
 if(LIGHT_USE_ZSTD)
   include(cmake/zstd.cmake)
-  add_definitions(-DLIGHT_USE_ZSTD)
+  target_compile_definitions(light_pcapng PRIVATE LIGHT_USE_ZSTD=1)
   target_link_libraries(light_pcapng light_zstd)
 endif()
 
@@ -35,7 +39,7 @@ option(LIGHT_USE_ZLIB "Compile with ZLIB support" ON)
 
 if(LIGHT_USE_ZLIB)
   include(cmake/zlib.cmake)
-  add_definitions(-DLIGHT_USE_ZLIB)
+  target_compile_definitions(light_pcapng PRIVATE LIGHT_USE_ZLIB=1)
   target_link_libraries(light_pcapng light_zlib)
 endif()
 

@@ -10,27 +10,27 @@
 #include <stdio.h>
 #include <zlib.h>      // presumes zlib library is installed
 
-size_t light_zlib_read(void* context, void* buf, size_t count)
+static size_t light_zlib_read(void* context, void* buf, size_t count)
 {
 	return gzread((gzFile)context, buf, count);
 }
 
-size_t light_zlib_write(void* context, const void* buf, size_t count)
+static size_t light_zlib_write(void* context, const void* buf, size_t count)
 {
 	return gzwrite((gzFile)context, buf, count);
 }
 
-int light_zlib_flush(void* context)
+static int light_zlib_flush(void* context)
 {
 	return gzflush((gzFile)context, Z_NO_FLUSH);
 }
 
-int light_zlib_seek(void* context, long int offset, int origin)
+static int64_t light_zlib_seek(void* context, int64_t offset, int origin)
 {
-	return gzseek((gzFile)context, offset, origin);
+	return gzseek64((gzFile)context, offset, origin);
 }
 
-int light_zlib_close(void* context)
+static int light_zlib_close(void* context)
 {
 	return gzclose((gzFile)context);
 }

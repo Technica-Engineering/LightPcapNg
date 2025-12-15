@@ -24,22 +24,28 @@
 #include <stdio.h>
 #include <stdlib.h> 
 
-size_t light_file_read(void* context, void* buf, size_t count)
+static size_t light_file_read(void* context, void* buf, size_t count)
 {
 	FILE* file = context;
 	return fread(buf, 1, count, file);
 }
 
-size_t light_file_write(void* context, const void* buf, size_t count)
+static size_t light_file_write(void* context, const void* buf, size_t count)
 {
 	FILE* file = context;
 	return fwrite(buf, 1, count, file);
 }
 
-int light_file_seek(void* context, long int offset, int origin)
+static int64_t light_file_seek(void* context, int64_t offset, int origin)
 {
 	FILE* file = context;
+#if WIN32
+	return _fseeki64(file, offset, origin);
+#elif HAVE_FSEEKO64
+	return fseeko64(file, offset, origin);
+#else
 	return fseek(file, offset, origin);
+#endif
 }
 
 int light_file_flush(void* context)
@@ -70,6 +76,7 @@ light_file light_io_file_create(FILE* file)
 	fd->context = file;
 	fd->fn_read = &light_file_read;
 	fd->fn_write = &light_file_write;
+	fd->fn_seek = &light_file_seek;
 	fd->fn_flush = &light_file_flush;
 	fd->fn_close = &light_file_close;
 	return fd;
