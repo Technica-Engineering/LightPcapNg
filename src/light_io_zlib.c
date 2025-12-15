@@ -27,7 +27,12 @@ static int light_zlib_flush(void* context)
 
 static int64_t light_zlib_seek(void* context, int64_t offset, int origin)
 {
+#ifdef Z_LARGE64
 	return gzseek64((gzFile)context, offset, origin);
+#else
+	return gzseek((gzFile)context, offset, origin);
+#endif
+
 }
 
 static int light_zlib_close(void* context)
