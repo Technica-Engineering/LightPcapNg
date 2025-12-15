@@ -22,7 +22,7 @@
 #include "light_io_file.h"
 #include "light_io_internal.h"
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 
 static size_t light_file_read(void* context, void* buf, size_t count)
 {
@@ -39,9 +39,9 @@ static size_t light_file_write(void* context, const void* buf, size_t count)
 static int64_t light_file_seek(void* context, int64_t offset, int origin)
 {
 	FILE* file = context;
-#if WIN32
+#if _WIN32
 	return _fseeki64(file, offset, origin);
-#elif HAVE_FSEEKO64
+#elif defined(HAVE_FSEEKO64)
 	return fseeko64(file, offset, origin);
 #else
 	return fseek(file, offset, origin);
