@@ -25,9 +25,14 @@ int light_zlib_flush(void* context)
 	return gzflush((gzFile)context, Z_NO_FLUSH);
 }
 
-int light_zlib_seek(void* context, long int offset, int origin)
+int light_zlib_seek(void* context, off_t offset, int origin)
 {
 	return gzseek((gzFile)context, offset, origin);
+}
+
+off_t light_zlib_offset(void* context)
+{
+	return gzoffset((gzFile)context);
 }
 
 int light_zlib_close(void* context)
@@ -49,6 +54,7 @@ light_file light_io_zlib_open(const char* filename, const char* mode)
 	fd->fn_write = &light_zlib_write;
 	fd->fn_flush = &light_zlib_flush;
 	fd->fn_seek = &light_zlib_seek;
+	fd->fn_offset = &light_zlib_offset;
 	fd->fn_close = &light_zlib_close;
 
 	return fd;

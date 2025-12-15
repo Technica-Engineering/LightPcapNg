@@ -22,7 +22,7 @@
 #include "light_io_file.h"
 #include "light_io_internal.h"
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 
 size_t light_file_read(void* context, void* buf, size_t count)
 {
@@ -36,10 +36,16 @@ size_t light_file_write(void* context, const void* buf, size_t count)
 	return fwrite(buf, 1, count, file);
 }
 
-int light_file_seek(void* context, long int offset, int origin)
+int light_file_seek(void* context, off_t offset, int origin)
 {
 	FILE* file = context;
-	return fseek(file, offset, origin);
+	return fseeko(file, offset, origin);
+}
+
+off_t light_file_offset(void* context)
+{
+	FILE* file = context;
+	return ftello(file);
 }
 
 int light_file_flush(void* context)
@@ -71,6 +77,8 @@ light_file light_io_file_create(FILE* file)
 	fd->fn_read = &light_file_read;
 	fd->fn_write = &light_file_write;
 	fd->fn_flush = &light_file_flush;
+	fd->fn_seek = &light_file_seek;
+	fd->fn_offset = &light_file_offset;
 	fd->fn_close = &light_file_close;
 	return fd;
 }
