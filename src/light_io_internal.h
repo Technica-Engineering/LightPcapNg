@@ -27,7 +27,7 @@
 
 typedef size_t(*light_fn_read)(void* context, void* buf, size_t count);
 typedef size_t(*light_fn_write)(void* context, const void* buf, size_t count);
-typedef int(*light_fn_seek)(void* context, long int offset, int origin);
+typedef int64_t(*light_fn_seek)(void* context, int64_t offset, int origin);
 typedef int(*light_fn_flush)(void* context);
 typedef int(*light_fn_close)(void* context);
 

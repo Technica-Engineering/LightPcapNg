@@ -24,7 +24,6 @@
 #include "light_io.h"
 #include "light_debug.h"
 #include "light_util.h"
-#include "light_debug.h"
 
 #include <stdlib.h>
 #include <string.h>

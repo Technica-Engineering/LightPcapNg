@@ -33,7 +33,7 @@ typedef struct mem_context
 	size_t size;
 } mem_context;
 
-size_t light_mem_read(void* context, void* buf, size_t count)
+static size_t light_mem_read(void* context, void* buf, size_t count)
 {
 	mem_context* mem = context;
 	size_t remaining = mem->size - mem->offset;
@@ -46,7 +46,7 @@ size_t light_mem_read(void* context, void* buf, size_t count)
 	return len;
 }
 
-size_t light_mem_write(void* context, const void* buf, size_t count)
+static size_t light_mem_write(void* context, const void* buf, size_t count)
 {
 	mem_context* mem = context;
 	size_t remaining = mem->size - mem->offset;
@@ -59,7 +59,7 @@ size_t light_mem_write(void* context, const void* buf, size_t count)
 	return len;
 }
 
-int light_mem_seek(void* context, long int offset, int origin)
+static int64_t light_mem_seek(void* context, int64_t offset, int origin)
 {
 	mem_context* mem = context;
 	size_t new_offset = -1;
@@ -82,12 +82,12 @@ int light_mem_seek(void* context, long int offset, int origin)
 	return 0;
 }
 
-int light_mem_flush(void* context)
+static int light_mem_flush(void* context)
 {
 	return 0;
 }
 
-int light_mem_close(void* context)
+static int light_mem_close(void* context)
 {
 	free(context);
 	return 0;
@@ -107,6 +107,7 @@ light_file light_io_mem_create(void* memory, size_t size)
 	fd->context = mem;
 	fd->fn_read = &light_mem_read;
 	fd->fn_write = &light_mem_write;
+	fd->fn_seek = &light_mem_seek;
 	fd->fn_flush = &light_mem_flush;
 	fd->fn_close = &light_mem_close;
 	return fd;
