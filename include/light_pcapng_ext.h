@@ -60,6 +60,19 @@ typedef struct light_packet_header {
 
 } light_packet_header;
 
+typedef enum light_decryption_type_t {
+    LIGHT_DECRYPT_TLS = 0,
+    LIGHT_DECRYPT_WIREGUARD,
+    LIGHT_DECRYPT_ZIGBEE_NWK,
+    LIGHT_DECRYPT_ZIGBEE_APS
+} light_decryption_type_t;
+
+typedef struct light_packet_decryption {
+	light_decryption_type_t secret_type;
+	uint8_t* key;
+	uint32_t key_size;
+} light_packet_decryption;
+
 typedef struct light_file_info {
 	uint16_t major_version;
 	uint16_t minor_version;
@@ -88,6 +101,9 @@ LIGHT_API int LIGHT_API_CALL light_read_packet(light_pcapng pcapng, light_packet
 LIGHT_API int LIGHT_API_CALL light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header *packet_header, const uint8_t *packet_data);
 
 LIGHT_API int LIGHT_API_CALL light_write_interface_block(light_pcapng pcapng, const light_packet_interface* packet_interface);
+
+//Writes a decryption secrets Block (DSB) to pcapng file
+LIGHT_API int LIGHT_API_CALL light_write_decryption_block(light_pcapng pcapng, const light_packet_decryption* packet_decryption);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 
