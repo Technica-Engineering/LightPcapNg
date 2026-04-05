@@ -519,7 +519,8 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 
     // Calculate Total Block Length
     // secrets_type(4) + secrets_len(4) + key
-    const uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
+    uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
+	PADD32(total_size, &total_size);
 	struct _light_decryption_secrets_block* decryption_block = calloc(1, total_size);
     if (decryption_block == NULL) {
 		return LIGHT_OUT_OF_MEMORY;
