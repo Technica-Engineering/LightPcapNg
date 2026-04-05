@@ -40,6 +40,12 @@ extern "C" {
 struct light_pcapng_t;
 typedef struct light_pcapng_t* light_pcapng;
 
+//different secret types for decryption secret block
+#define LIGHT_DSB_SECRET_TLSK 0x544C534B
+#define LIGHT_DSB_SECRET_WGKL 0x57474B4C
+#define LIGHT_DSB_SECRET_ZNWK 0x5A4E574B
+#define LIGHT_DSB_SECRET_ZAPK 0x5A41504B
+
 typedef struct light_packet_interface {
 	uint16_t link_type;
 	char* name;
@@ -60,17 +66,12 @@ typedef struct light_packet_header {
 
 } light_packet_header;
 
-typedef enum light_decryption_type_t {
-    LIGHT_DECRYPT_TLS = 0,
-    LIGHT_DECRYPT_WIREGUARD,
-    LIGHT_DECRYPT_ZIGBEE_NWK,
-    LIGHT_DECRYPT_ZIGBEE_APS
-} light_decryption_type_t;
-
 typedef struct light_packet_decryption {
-	light_decryption_type_t secret_type;
+	uint32_t secret_type;
 	uint8_t* key;
 	uint32_t key_size;
+
+	char* comment;
 } light_packet_decryption;
 
 typedef struct light_file_info {

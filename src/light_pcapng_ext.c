@@ -485,16 +485,14 @@ int light_write_interface_block(light_pcapng pcapng, const light_packet_interfac
         return 0;
 }
 
-static uint32_t _get_secret_type(const light_decryption_type_t user_type, const bool swap_endianness) 
+static uint32_t _check_secret_type(const uint32_t secret_type, const bool swap_endianness) 
 {
-	uint32_t secret_type = 0;
-    switch (user_type) {
-        case LIGHT_DECRYPT_TLS:         secret_type = TLSK; break; // 'TLSK'
-        case LIGHT_DECRYPT_WIREGUARD:   secret_type = WGKL; break; // 'WGKL'
-        case LIGHT_DECRYPT_ZIGBEE_NWK:  secret_type = ZNWK; break; // 'ZNWK'
-        case LIGHT_DECRYPT_ZIGBEE_APS:  secret_type = ZAPK; break; // 'ZAPK'
-        default:                        return 0; 				   // Unknown type
-    }
+	if (secret_type != LIGHT_DSB_SECRET_TLSK && 
+	    secret_type != LIGHT_DSB_SECRET_WGKL && 
+		secret_type != LIGHT_DSB_SECRET_ZNWK &&
+		secret_type != LIGHT_DSB_SECRET_ZAPK) {
+	    return 0;
+	}
 
 	return swap_endianness ? bswap32(secret_type) : secret_type;
 }
@@ -512,7 +510,7 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 	}
 
 	const bool swap_endianness = pcapng->swap_endianness;
-	const uint32_t secret_type = _get_secret_type(packet_decryption->secret_type, swap_endianness);
+	const uint32_t secret_type = _check_secret_type(packet_decryption->secret_type, swap_endianness);
 	if (secret_type == 0) {
 		return LIGHT_INVALID_ARGUMENT;
 	}
@@ -521,7 +519,7 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 
     // Calculate Total Block Length
     // secrets_type(4) + secrets_len(4) + key
-    uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
+    const uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
 	struct _light_decryption_secrets_block* decryption_block = calloc(1, total_size);
     if (decryption_block == NULL) {
 		return LIGHT_OUT_OF_MEMORY;
@@ -537,6 +535,11 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 	if (decryption_block_pcapng == NULL) {
 		free(decryption_block);
 		return LIGHT_FAILURE;
+	}
+
+	if (packet_decryption->comment) {
+		light_option comment_option = light_create_option(LIGHT_OPTION_COMMENT, strlen(packet_decryption->comment), packet_decryption->comment);
+        light_add_option(NULL, decryption_block_pcapng, comment_option, false);
 	}
 	
 	light_write_block(pcapng->file, decryption_block_pcapng);

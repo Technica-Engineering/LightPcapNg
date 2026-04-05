@@ -77,12 +77,6 @@ extern "C" {
 
 #define BYTE_ORDER_MAGIC            0x1A2B3C4D
 
-//different secret types for decryption secret block
-#define TLSK 0x544C534B
-#define WGKL 0x57474B4C
-#define ZNWK 0x5A4E574B
-#define ZAPK 0x5A41504B
-
 // error codes
 
 #define LIGHT_SUCCESS           0
