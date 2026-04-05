@@ -27,6 +27,9 @@
 #include <time.h>
 #include <assert.h>
 
+#define SWAP16(x) (((x) >> 8) | ((x) << 8))
+#define SWAP32(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24))
+
 /**
  * validates that the DSB block was written correctly.
  */
@@ -63,8 +66,11 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     //Check Block Type (DSB is 0x0000000A)
     // We check both endian possibilities : big endian or little endian
     uint32_t block_type = *(uint32_t*)buffer;
+    int must_swap = 0;
 
-    if (block_type != 0x0000000A && block_type != 0x0A000000) {
+    if (block_type == 0x0A000000) {
+        must_swap = 1;
+    } else if (block_type != 0x0000000A) {
         printf("Invalid Block Type for DSB\n");
         free(buffer);
         return 1;
@@ -73,6 +79,10 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     //Verify Secrets Type and Key Length (Offsets 8 and 12)
     uint32_t written_secret_type = *(uint32_t*)(buffer + 8);
     uint32_t written_key_len = *(uint32_t*)(buffer + 12);
+    if (must_swap) {
+        written_secret_type = SWAP32(written_secret_type);
+        written_key_len = SWAP32(written_key_len);
+    }
 
     if (written_secret_type != expected_secret_type) {
         printf("Secret Type mismatch\n");
@@ -109,6 +119,11 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     if (expected_comment != NULL) {
         uint16_t opt_code = *(uint16_t*)(buffer + options_offset);
         uint16_t opt_len = *(uint16_t*)(buffer + options_offset + 2);
+        if (must_swap) {
+            opt_code = SWAP16(opt_code);
+            opt_len = SWAP16(opt_len);
+        }
+
         uint32_t expected_comment_len = (uint32_t)strlen(expected_comment);
 
         if (opt_code != 1) { // 1 is the code for 'opt_comment'
@@ -132,6 +147,9 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
 
     //Verify "End of options" (Must be 4 bytes of 0x00)
     uint32_t opt_end = *(uint32_t*)(buffer + options_offset);
+    if (must_swap) {
+        opt_end = SWAP32(opt_end);
+    }
     if (opt_end != 0) {
         printf("Missing or invalid end of options marker\n");
         free(buffer);
@@ -140,6 +158,9 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
 
     //Verify the trailing length matches the leading length
     uint32_t leading_len = *(uint32_t*)(buffer + 4);
+    if (must_swap) {
+        leading_len = SWAP32(leading_len);
+    }
     if (leading_len != trailing_len) {
         printf("Block length symmetry failed\n");
         free(buffer);
