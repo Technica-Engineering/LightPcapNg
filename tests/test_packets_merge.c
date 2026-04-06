@@ -69,7 +69,7 @@ int main(int argc, const char** args) {
 			int res = 0;
 
 			res = light_read_packet(reader, &pkt_interface, &pkt_header, &pkt_data);
-			if (!res || pkt_data == NULL) {
+			if (res != 0 || pkt_data == NULL) {
 				break;
 			}
 
