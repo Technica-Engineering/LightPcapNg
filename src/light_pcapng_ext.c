@@ -322,10 +322,14 @@ void __get_interface(light_pcapng pcapng, size_t index, light_packet_interface* 
 
 int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interface, light_packet_header* packet_header, const uint8_t** packet_data)
 {
-	DCHECK_NULLP(pcapng, return 0);
-	DCHECK_NULLP(packet_interface, return 0);
-	DCHECK_NULLP(packet_header, return 0);
-	DCHECK_NULLP(packet_data, return 0);
+	DCHECK_NULLP(pcapng, return LIGHT_INVALID_ARGUMENT);
+	DCHECK_NULLP(packet_interface, return LIGHT_INVALID_ARGUMENT);
+	DCHECK_NULLP(packet_header, return LIGHT_INVALID_ARGUMENT);
+	DCHECK_NULLP(packet_data, return LIGHT_INVALID_ARGUMENT);
+
+	if (pcapng->file == NULL) {
+		return LIGHT_INVALID_ARGUMENT;
+	}
 
 	light_free_block(pcapng->current);
 	pcapng->current = NULL;
@@ -335,7 +339,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 		light_read_block(pcapng->file, &block, &(pcapng->swap_endianness));
 		if (block == NULL) {
 			//End of file or something is broken
-			return 0;
+			return LIGHT_FAILURE;
 		}
 		if (block->type == LIGHT_ENHANCED_PACKET_BLOCK || block->type == LIGHT_SIMPLE_PACKET_BLOCK)
 		{
@@ -428,7 +432,7 @@ int light_read_packet(light_pcapng pcapng, light_packet_interface* packet_interf
 
 	pcapng->current = block;
 
-	return 1;
+	return LIGHT_SUCCESS;
 }
 
 int safe_strcmp(char const* str1, char const* str2) {
@@ -482,7 +486,7 @@ int light_write_interface_block(light_pcapng pcapng, const light_packet_interfac
 
         light_free_block(iface_block_pcapng);
 
-        return 0;
+        return LIGHT_SUCCESS;
 }
 
 int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header* packet_header, const uint8_t* packet_data)
