@@ -67,3 +67,8 @@ add_test(
     NAME "unit.write_pcapng"
     COMMAND test_write_pcapng "${CMAKE_CURRENT_LIST_DIR}/results/test_write_pcapng.pcapng"
 )
+
+add_test(
+    NAME "unit.write_tls_decryption_block"
+    COMMAND test_write_tls_decryption_block "${CMAKE_CURRENT_LIST_DIR}/results/test_write_decryption_block.pcapng"
+)

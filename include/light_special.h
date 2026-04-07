@@ -55,6 +55,12 @@ struct _light_simple_packet_block {
 	uint8_t packet_data[0];
 };
 
+struct _light_decryption_secrets_block {
+	uint32_t secrets_type;    /* Identifies the format of the secrets (example 0x544c534b for TLS) */
+	uint32_t secrets_len;     /* Length of the secrets data in bytes (excluding padding) */
+	uint8_t key_data[0];      /* key data */
+};
+
 #ifdef __cplusplus
 }
 #endif

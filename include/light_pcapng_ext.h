@@ -40,6 +40,12 @@ extern "C" {
 struct light_pcapng_t;
 typedef struct light_pcapng_t* light_pcapng;
 
+//different secret types for decryption secret block
+#define LIGHT_DSB_SECRET_TLSK 0x544C534B
+#define LIGHT_DSB_SECRET_WGKL 0x57474B4C
+#define LIGHT_DSB_SECRET_ZNWK 0x5A4E574B
+#define LIGHT_DSB_SECRET_ZAPK 0x5A41504B
+
 typedef struct light_packet_interface {
 	uint16_t link_type;
 	char* name;
@@ -59,6 +65,14 @@ typedef struct light_packet_header {
 	uint32_t queue;
 
 } light_packet_header;
+
+typedef struct light_packet_decryption {
+	uint32_t secret_type;
+	uint8_t* key;
+	uint32_t key_size;
+
+	char* comment;
+} light_packet_decryption;
 
 typedef struct light_file_info {
 	uint16_t major_version;
@@ -88,6 +102,9 @@ LIGHT_API int LIGHT_API_CALL light_read_packet(light_pcapng pcapng, light_packet
 LIGHT_API int LIGHT_API_CALL light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header *packet_header, const uint8_t *packet_data);
 
 LIGHT_API int LIGHT_API_CALL light_write_interface_block(light_pcapng pcapng, const light_packet_interface* packet_interface);
+
+//Writes a decryption secrets Block (DSB) to pcapng file
+LIGHT_API int LIGHT_API_CALL light_write_decryption_block(light_pcapng pcapng, const light_packet_decryption* packet_decryption);
 
 LIGHT_API int LIGHT_API_CALL light_pcapng_close(light_pcapng pcapng);
 

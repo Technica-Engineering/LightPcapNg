@@ -489,6 +489,57 @@ int light_write_interface_block(light_pcapng pcapng, const light_packet_interfac
         return LIGHT_SUCCESS;
 }
 
+//This function encapsulates decryption secrets (like TLS Key Logs or WireGuard keys) 
+//into a PcapNg DSB block and ensures the secret type is correctly mapped and byte-swapped based on 
+//the file's endianness.
+int light_write_decryption_block(light_pcapng pcapng, const light_packet_decryption* packet_decryption)
+{
+	DCHECK_NULLP(pcapng, return LIGHT_INVALID_ARGUMENT);
+	DCHECK_NULLP(packet_decryption, return LIGHT_INVALID_ARGUMENT);
+
+	if (pcapng->file == NULL || packet_decryption->key == NULL) {
+		return LIGHT_INVALID_ARGUMENT;
+	}
+
+	const uint32_t secret_type = packet_decryption->secret_type;
+    const uint32_t key_len = packet_decryption->key_size;
+
+    // Calculate Total Block Length
+    // secrets_type(4) + secrets_len(4) + key
+    uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
+	PADD32(total_size, &total_size);
+	struct _light_decryption_secrets_block* decryption_block = calloc(1, total_size);
+    if (decryption_block == NULL) {
+		return LIGHT_OUT_OF_MEMORY;
+	}
+
+	const bool swap_endianness = pcapng->swap_endianness;
+    decryption_block->secrets_type = (swap_endianness ? bswap32(secret_type) : secret_type); 	 // secrets_type
+    decryption_block->secrets_len = (swap_endianness ? bswap32(key_len) : key_len);              // secrets_len
+	// Copy the key string starting at offset 8
+    memcpy(decryption_block->key_data, packet_decryption->key, key_len);
+
+	light_block decryption_block_pcapng = light_create_block(LIGHT_DECRYPTION_SECRETS_BLOCK, (const uint32_t*)decryption_block, total_size + 3 * sizeof(uint32_t));
+	
+	if (decryption_block_pcapng == NULL) {
+		free(decryption_block);
+		return LIGHT_FAILURE;
+	}
+
+	if (packet_decryption->comment) {
+		light_option comment_option = light_create_option(LIGHT_OPTION_COMMENT, strlen(packet_decryption->comment), packet_decryption->comment);
+        light_add_option(NULL, decryption_block_pcapng, comment_option, false);
+	}
+	
+	light_write_block(pcapng->file, decryption_block_pcapng);
+	light_free_block(decryption_block_pcapng);
+	
+
+	//cleanup
+	free(decryption_block);
+	return LIGHT_SUCCESS;
+}
+
 int light_write_packet(light_pcapng pcapng, const light_packet_interface* packet_interface, const light_packet_header* packet_header, const uint8_t* packet_data)
 {
 	DCHECK_NULLP(pcapng, return LIGHT_INVALID_ARGUMENT);
