@@ -485,18 +485,6 @@ int light_write_interface_block(light_pcapng pcapng, const light_packet_interfac
         return 0;
 }
 
-static uint32_t _check_secret_type(const uint32_t secret_type, const bool swap_endianness) 
-{
-	if (secret_type != LIGHT_DSB_SECRET_TLSK && 
-	    secret_type != LIGHT_DSB_SECRET_WGKL && 
-		secret_type != LIGHT_DSB_SECRET_ZNWK &&
-		secret_type != LIGHT_DSB_SECRET_ZAPK) {
-	    return 0;
-	}
-
-	return swap_endianness ? bswap32(secret_type) : secret_type;
-}
-
 //This function encapsulates decryption secrets (like TLS Key Logs or WireGuard keys) 
 //into a PcapNg DSB block and ensures the secret type is correctly mapped and byte-swapped based on 
 //the file's endianness.
@@ -509,12 +497,7 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 		return LIGHT_INVALID_ARGUMENT;
 	}
 
-	const bool swap_endianness = pcapng->swap_endianness;
-	const uint32_t secret_type = _check_secret_type(packet_decryption->secret_type, swap_endianness);
-	if (secret_type == 0) {
-		return LIGHT_INVALID_ARGUMENT;
-	}
-
+	const uint32_t secret_type = packet_decryption->secret_type;
     const uint32_t key_len = packet_decryption->key_size;
 
     // Calculate Total Block Length
@@ -526,8 +509,9 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 		return LIGHT_OUT_OF_MEMORY;
 	}
 
-    decryption_block->secrets_type = secret_type; 										 // secrets_type
-    decryption_block->secrets_len = (swap_endianness ? bswap32(key_len) : key_len);      // secrets_len
+	const bool swap_endianness = pcapng->swap_endianness;
+    decryption_block->secrets_type = (swap_endianness ? bswap32(secret_type) : secret_type); 	 // secrets_type
+    decryption_block->secrets_len = (swap_endianness ? bswap32(key_len) : key_len);              // secrets_len
 	// Copy the key string starting at offset 8
     memcpy(decryption_block->key_data, packet_decryption->key, key_len);
 
