@@ -101,6 +101,18 @@ extern "C" {
 		struct light_option_t* next_option;
 	};
 
+	struct light_zigbee_aps {
+		uint8_t  key[16];
+		uint16_t pan_id;
+		uint16_t low_node_short_addr;
+		uint16_t high_node_short_addr;
+	};
+
+	struct light_zigbee_nwk {
+		uint8_t  key[16];
+		uint16_t pan_id;
+	};
+
 	typedef struct light_block_t* light_block;
 	typedef struct light_option_t* light_option;
 

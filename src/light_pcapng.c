@@ -75,20 +75,25 @@ void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, 
 }
 
 void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_block* dsb, const bool swap_endianness) {
-	if (swap_endianness) {
-		dsb->secrets_type = bswap32(dsb->secrets_type);
-		dsb->secrets_len = bswap32(dsb->secrets_len);
+	if (!swap_endianness) {
+		return;
+	}
 
-		// check if this is a zigbee type
-        if ((dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK || dsb->secrets_type == LIGHT_DSB_SECRET_ZAPK) && dsb->secrets_len >= 10) {
-            // the first 2 bytes are the PAN ID
-            uint16_t *pan_id = (uint16_t*)dsb->key_data;
-            *pan_id = bswap16(*pan_id);
+	dsb->secrets_type = bswap32(dsb->secrets_type);
+	dsb->secrets_len = bswap32(dsb->secrets_len);
 
-            // the next 8 bytes are the extended PAN ID
-            uint64_t *ext_pan_id = (uint64_t*)(dsb->key_data + 2);
-            *ext_pan_id = bswap64(*ext_pan_id);
-        }
+	// check if this is a zigbee type
+	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK && dsb->secrets_len >= 18) {
+		struct light_zigbee_nwk* zigbee_nwk = (struct light_zigbee_nwk*)(dsb->key_data);
+		zigbee_nwk->pan_id = bswap16(zigbee_nwk->pan_id);
+	}
+
+	if(dsb->secrets_type == LIGHT_DSB_SECRET_ZAPS && dsb->secrets_len >= 22) {
+		struct light_zigbee_aps* zigbee_aps = (struct light_zigbee_aps*)(dsb->key_data);
+
+		zigbee_aps->pan_id = bswap16(zigbee_aps->pan_id);
+		zigbee_aps->low_node_short_addr  = bswap16(zigbee_aps->low_node_short_addr);
+		zigbee_aps->high_node_short_addr  = bswap16(zigbee_aps->high_node_short_addr);
 	}
 }
 
