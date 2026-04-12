@@ -28,6 +28,7 @@ extern "C" {
 
 #include "light_export.h"
 #include "light_io.h"
+#include "light_dsb_secrets.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -39,12 +40,6 @@ extern "C" {
 
 struct light_pcapng_t;
 typedef struct light_pcapng_t* light_pcapng;
-
-//different secret types for decryption secret block
-#define LIGHT_DSB_SECRET_TLSK 0x544C534B
-#define LIGHT_DSB_SECRET_WGKL 0x57474B4C
-#define LIGHT_DSB_SECRET_ZNWK 0x5A4E574B
-#define LIGHT_DSB_SECRET_ZAPK 0x5A41504B
 
 typedef struct light_packet_interface {
 	uint16_t link_type;

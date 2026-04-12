@@ -24,6 +24,7 @@
 #include "light_debug.h"
 #include "light_util.h"
 #include "light_io.h"
+#include "light_dsb_secrets.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -77,6 +78,17 @@ void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_blo
 	if (swap_endianness) {
 		dsb->secrets_type = bswap32(dsb->secrets_type);
 		dsb->secrets_len = bswap32(dsb->secrets_len);
+
+		// check if this is a zigbee type
+        if ((dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK || dsb->secrets_type == LIGHT_DSB_SECRET_ZAPK) && dsb->secrets_len >= 10) {
+            // the first 2 bytes are the PAN ID
+            uint16_t *pan_id = (uint16_t*)dsb->key_data;
+            *pan_id = bswap16(*pan_id);
+
+            // the next 8 bytes are the extended PAN ID
+            uint64_t *ext_pan_id = (uint64_t*)(dsb->key_data + 2);
+            *ext_pan_id = bswap64(*ext_pan_id);
+        }
 	}
 }
 
@@ -290,9 +302,9 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		// fix endianness
 		dsb->secrets_type = secret_type;
 		dsb->secrets_len = secret_len;
+		memcpy(dsb->key_data, local_data, secret_len);
 		fix_endianness_decryption_packet_block(dsb, swap_endianness);
 
-		memcpy(dsb->key_data, local_data, dsb->secrets_len);
 		local_data += len_data_with_padding;
 
 		current->body = (uint8_t*)dsb;
