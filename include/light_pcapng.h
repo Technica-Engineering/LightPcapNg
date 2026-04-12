@@ -110,6 +110,7 @@ extern "C" {
 	void fix_endianness_interface_description_block(struct _light_interface_description_block* idb, const bool swap_endianness);
 	void fix_endianness_enhanced_packet_block(struct _light_enhanced_packet_block* epb, const bool swap_endianness);
 	void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, const bool swap_endianness);
+	void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_block* dsb, const bool swap_endianness);
 
 	// block functions
 

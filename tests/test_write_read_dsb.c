@@ -62,9 +62,11 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     }
 
     //Verify Secrets Type and Key Length (Offsets  0 and 4)
-    uint8_t* buffer = block->body;
-    uint32_t written_secret_type = *(uint32_t*)(buffer);
-    uint32_t written_key_len = *(uint32_t*)(buffer + 4);
+    struct _light_decryption_secrets_block* dsb_block = (struct _light_decryption_secrets_block*) (block->body);
+    struct light_option_t* dsb_options = (struct light_option_t*) (block->options);
+
+    uint32_t written_secret_type = dsb_block->secrets_type;
+    uint32_t written_key_len = dsb_block->secrets_len;
 
     if (written_secret_type != expected_secret_type) {
         printf("Secret Type mismatch\n");
@@ -79,7 +81,7 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     }
 
     //Verify the actual Key Data (Offset 8)
-    if (memcmp(buffer + 8, expected_key, key_len) != 0) {
+    if (memcmp(dsb_block->key_data, expected_key, key_len) != 0) {
         printf("Key data corruption\n");
         light_free_block(block);
         return 1;
@@ -89,11 +91,33 @@ int verify_dsb_block(const char* filename, const light_packet_decryption expecte
     // Pcapng requires blocks to be multiples of 4 bytes.
     uint32_t key_padding = (4 - (key_len % 4)) % 4;
     for (uint32_t i = 0; i < key_padding; i++) {
-        if (buffer[8 + key_len + i] != 0) {
+        if (dsb_block->key_data[key_len + i] != 0) {
             printf("Padding bytes must be zero\n");
             light_free_block(block);
             return 1;
         }
+    }
+
+    uint16_t option_code = dsb_options->code;
+    uint16_t option_len = dsb_options->length;
+    uint8_t* option_data = dsb_options->data;
+
+    if(option_code != LIGHT_OPTION_COMMENT) {
+        printf("option code mismatch\n");
+        light_free_block(block);
+        return 1;
+    }
+
+    if(option_len != strlen(expected_comment)) {
+        printf("option length mismatch\n");
+        light_free_block(block);
+        return 1;
+    }
+
+    if (memcmp(dsb_options->data, expected_comment, option_len) != 0) {
+        printf("option data corruption\n");
+        light_free_block(block);
+        return 1;
     }
 
     light_free_block(block);
