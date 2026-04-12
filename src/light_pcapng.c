@@ -274,7 +274,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		local_data += 4;
 		uint32_t secret_len = *(uint32_t*)local_data;
 		local_data += 4;
-		struct _light_decryption_secrets_block* dsb = NULL;
+
 		/*before allocating memory we should check endianness of secret_len
 		If reading a pcapng file with different endianness than our CPU 
 		( for example reading a big endian file on an x86 Little Endian machine), 
@@ -282,7 +282,9 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		if (swap_endianness) {
             secret_len = bswap32(secret_len);
         }
-		dsb = calloc(1, sizeof(struct _light_decryption_secrets_block) + secret_len);
+		uint32_t len_data_with_padding = 0;
+		PADD32(secret_len, &len_data_with_padding);
+		struct _light_decryption_secrets_block* dsb = calloc(1, sizeof(struct _light_decryption_secrets_block) + len_data_with_padding);
 		DCHECK_NULLP(dsb, return);
 
 		// fix endianness
@@ -291,8 +293,6 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		fix_endianness_decryption_packet_block(dsb, swap_endianness);
 
 		memcpy(dsb->key_data, local_data, dsb->secrets_len);
-		uint32_t len_data_with_padding = 0;
-		PADD32(dsb->secrets_len, &len_data_with_padding);
 		local_data += len_data_with_padding;
 
 		current->body = (uint8_t*)dsb;
