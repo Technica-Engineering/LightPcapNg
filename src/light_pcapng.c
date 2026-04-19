@@ -80,11 +80,11 @@ void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_blo
 		dsb->secrets_len = bswap32(dsb->secrets_len);
 	}
 
-	// ZigBee payload fields are always little-endian per lightpcapng spec,
+	// ZigBee payload fields are always little-endian per pcapng spec,
 	// regardless of the pcapng file byte order.
 	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK && dsb->secrets_len >= 18) {
 		struct light_zigbee_nwk* zigbee_nwk = (struct light_zigbee_nwk*)(dsb->key_data);
-		// PAN ID is always LE per lightpcapng spec
+		// PAN ID is always LE per pcapng spec
 		zigbee_nwk->pan_id = le16toh(zigbee_nwk->pan_id);
 	}
 
