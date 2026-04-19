@@ -75,25 +75,25 @@ void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, 
 }
 
 void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_block* dsb, const bool swap_endianness) {
-	if (!swap_endianness) {
-		return;
+	if (swap_endianness) {
+		dsb->secrets_type = bswap32(dsb->secrets_type);
+		dsb->secrets_len = bswap32(dsb->secrets_len);
 	}
 
-	dsb->secrets_type = bswap32(dsb->secrets_type);
-	dsb->secrets_len = bswap32(dsb->secrets_len);
-
-	// check if this is a zigbee type
+	// ZigBee payload fields are always little-endian per lightpcapng spec,
+	// regardless of the pcapng file byte order.
 	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK && dsb->secrets_len >= 18) {
 		struct light_zigbee_nwk* zigbee_nwk = (struct light_zigbee_nwk*)(dsb->key_data);
-		zigbee_nwk->pan_id = bswap16(zigbee_nwk->pan_id);
+		// PAN ID is always LE per lightpcapng spec
+		zigbee_nwk->pan_id = le16toh(zigbee_nwk->pan_id);
 	}
 
-	if(dsb->secrets_type == LIGHT_DSB_SECRET_ZAPS && dsb->secrets_len >= 22) {
+	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZAPS && dsb->secrets_len >= 22) {
 		struct light_zigbee_aps* zigbee_aps = (struct light_zigbee_aps*)(dsb->key_data);
 
-		zigbee_aps->pan_id = bswap16(zigbee_aps->pan_id);
-		zigbee_aps->low_node_short_addr  = bswap16(zigbee_aps->low_node_short_addr);
-		zigbee_aps->high_node_short_addr  = bswap16(zigbee_aps->high_node_short_addr);
+		zigbee_aps->pan_id = le16toh(zigbee_aps->pan_id);
+		zigbee_aps->low_node_short_addr  = le16toh(zigbee_aps->low_node_short_addr);
+		zigbee_aps->high_node_short_addr  = le16toh(zigbee_aps->high_node_short_addr);
 	}
 }
 
