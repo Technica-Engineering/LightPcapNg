@@ -23,12 +23,12 @@
 // -DNDEBUG the call was dropped and the writer silently fell back to
 // zstd's default level (3) regardless of what the user asked for.
 //
-// Compresses the same highly compressible payload twice — once at level 1
-// and once at level 9 — and asserts the level-9 output is strictly smaller
-// than the level-1 output. If the level mapping is broken (or silently
-// dropped under NDEBUG), both files come out the same size and the assert
-// fails. This test must be built with NDEBUG defined to actually exercise
-// the bug; tests/CMakeLists.txt does that explicitly.
+// Reads packets from a real pcapng fixture and writes them out twice —
+// once at level 1 and once at level 9 — then asserts the level-9 output
+// is strictly smaller than the level-1 output. If the level mapping is
+// broken (or silently dropped under NDEBUG), both files come out the
+// same size and the assert fails. Real packet data gives a much more
+// reliable level-1 vs level-9 spread than synthetic patterns.
 
 #include "light_pcapng_ext.h"
 
@@ -36,51 +36,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <time.h>
 
-#define NUM_PACKETS 1000
-#define CAP_LEN 1500
-
-static int write_packets(const char* filename, const char* mode)
+static int copy_packets(const char* infile, const char* outfile, const char* outmode)
 {
-	light_pcapng writer = light_pcapng_open(filename, mode);
+	light_pcapng reader = light_pcapng_open(infile, "rb");
+	if (reader == NULL) {
+		fprintf(stderr, "open(%s, rb) failed\n", infile);
+		return -1;
+	}
+	light_pcapng writer = light_pcapng_open(outfile, outmode);
 	if (writer == NULL) {
-		fprintf(stderr, "open(%s, %s) failed\n", filename, mode);
+		fprintf(stderr, "open(%s, %s) failed\n", outfile, outmode);
+		light_pcapng_close(reader);
 		return -1;
 	}
 
+	int written = 0;
 	light_packet_interface iface = { 0 };
-	iface.link_type = 1;  // ETHERNET
-	iface.name = "interface1";
-	iface.timestamp_resolution = 1000000000;
-	light_write_interface_block(writer, &iface);
-
-	uint8_t* pkt_data = (uint8_t*)malloc(CAP_LEN);
-	if (pkt_data == NULL) {
-		light_pcapng_close(writer);
-		return -1;
-	}
-	// Compressible-but-non-trivial payload. Trivially compressible input
-	// (e.g. all zeros) is a poor signal because zstd's higher levels add
-	// frame overhead that can outweigh the marginal gains on tiny uniform
-	// data. A short repeating pattern with some byte variety gives the
-	// higher level a meaningful win.
-	for (size_t i = 0; i < CAP_LEN; i++) {
-		pkt_data[i] = (uint8_t)((i * 37) % 41);
+	light_packet_header hdr = { 0 };
+	const uint8_t* data = NULL;
+	while (light_read_packet(reader, &iface, &hdr, &data) == 0 && data != NULL) {
+		light_write_packet(writer, &iface, &hdr, data);
+		written++;
 	}
 
-	for (int i = 0; i < NUM_PACKETS; i++) {
-		light_packet_header hdr = { 0 };
-		struct timespec ts = { i + 1, 0 };
-		hdr.timestamp = ts;
-		hdr.captured_length = CAP_LEN;
-		hdr.original_length = CAP_LEN;
-		light_write_packet(writer, &iface, &hdr, pkt_data);
-	}
-
-	free(pkt_data);
+	light_pcapng_close(reader);
 	light_pcapng_close(writer);
-	return 0;
+	return written;
 }
 
 static long file_size(const char* filename)
@@ -95,25 +77,31 @@ static long file_size(const char* filename)
 
 int main(int argc, const char** args)
 {
-	if (argc < 3) {
-		fprintf(stderr, "Usage: %s <out_lvl1.zst> <out_lvl9.zst>\n", args[0]);
+	if (argc < 4) {
+		fprintf(stderr, "Usage: %s <input.pcapng> <out_lvl1.zst> <out_lvl9.zst>\n", args[0]);
 		return 1;
 	}
 
-	const char* out_lvl1 = args[1];
-	const char* out_lvl9 = args[2];
+	const char* infile = args[1];
+	const char* out_lvl1 = args[2];
+	const char* out_lvl9 = args[3];
 
-	if (write_packets(out_lvl1, "wb1") != 0) return 1;
-	if (write_packets(out_lvl9, "wb9") != 0) return 1;
+	int n_lvl1 = copy_packets(infile, out_lvl1, "wb1");
+	int n_lvl9 = copy_packets(infile, out_lvl9, "wb9");
+	if (n_lvl1 < 0 || n_lvl9 < 0) return 1;
+	if (n_lvl1 != n_lvl9) {
+		fprintf(stderr, "FAIL: packet count mismatch: lvl1=%d, lvl9=%d\n", n_lvl1, n_lvl9);
+		return 1;
+	}
 
 	long size_lvl1 = file_size(out_lvl1);
 	long size_lvl9 = file_size(out_lvl9);
 	if (size_lvl1 < 0 || size_lvl9 < 0) return 1;
 
-	fprintf(stderr, "lvl1=%ld bytes, lvl9=%ld bytes\n", size_lvl1, size_lvl9);
+	fprintf(stderr, "packets=%d, lvl1=%ld bytes, lvl9=%ld bytes\n", n_lvl1, size_lvl1, size_lvl9);
 
-	// Higher level must yield smaller output on this payload. If equal, the
-	// level parameter never reached zstd (the bug this test guards against).
+	// Higher level must yield smaller output on real packet data. If equal,
+	// the level parameter never reached zstd (the bug this test guards against).
 	if (size_lvl9 >= size_lvl1) {
 		fprintf(stderr,
 		        "FAIL: expected lvl9 < lvl1, got lvl9=%ld >= lvl1=%ld. "

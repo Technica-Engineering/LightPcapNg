@@ -79,6 +79,7 @@ if(LIGHT_USE_ZSTD)
     add_test(
         NAME "unit.zstd_compression_level"
         COMMAND test_zstd_compression_level
+            "${CMAKE_CURRENT_LIST_DIR}/../pcaps/caneth.pcapng"
             "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_compression_level_lvl1.pcapng.zst"
             "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_compression_level_lvl9.pcapng.zst"
     )
