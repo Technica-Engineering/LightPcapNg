@@ -81,4 +81,13 @@ if(LIGHT_USE_ZSTD)
             "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_workers_lvl.pcapng.zst"
             "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_workers_mt.pcapng.zst"
     )
+    # Only catches the bug when the library is built with -DNDEBUG (e.g.
+    # the Release preset); in Debug builds the assert is live and the call runs.
+    add_test(
+        NAME "unit.zstd_compression_level"
+        COMMAND test_zstd_compression_level
+            "${CMAKE_CURRENT_LIST_DIR}/../pcaps/caneth.pcapng"
+            "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_compression_level_lvl1.pcapng.zst"
+            "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_compression_level_lvl9.pcapng.zst"
+    )
 endif()

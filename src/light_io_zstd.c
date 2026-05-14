@@ -86,7 +86,12 @@ void* get_zstd_compression_context(FILE* file, int compression_level, int num_wo
 	context->buffer_out_max_size = MAX(ZSTD_CStreamOutSize(), COMPRESSION_BUFFER_IN_MAX_SIZE);
 	context->buffer_out = malloc(context->buffer_out_max_size);
 
-	assert(!ZSTD_isError(ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_compressionLevel, compression_level)));
+	// Set the compression level outside assert() so the call survives builds
+	// with -DNDEBUG, where assert(...) expands to (void)0 and the wrapped
+	// expression — the actual setParameter — is dropped.
+	size_t const set_level_result = ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_compressionLevel, compression_level);
+	assert(!ZSTD_isError(set_level_result));
+	(void)set_level_result;
 
 	// Tolerate setParameter failure (e.g. zstd built without multithreading)
 	// — the writer still works, just single-threaded.
