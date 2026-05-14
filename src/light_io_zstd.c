@@ -24,7 +24,6 @@
 #include "light_io.h"
 #include "light_io_internal.h"
 #include "light_io_zstd.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -92,11 +91,7 @@ void* get_zstd_compression_context(FILE* file, int compression_level, int num_wo
 	// Tolerate setParameter failure (e.g. zstd built without multithreading)
 	// — the writer still works, just single-threaded.
 	if (num_workers > 0) {
-		size_t const set_workers_result = ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_nbWorkers, num_workers);
-		if (ZSTD_isError(set_workers_result)) {
-			fprintf(stderr, "light_io_zstd: nbWorkers=%d ignored: %s\n",
-			        num_workers, ZSTD_getErrorName(set_workers_result));
-		}
+		(void)ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_nbWorkers, num_workers);
 	}
 
 	return context;
