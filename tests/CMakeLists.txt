@@ -74,6 +74,13 @@ add_test(
 )
 
 if(LIGHT_USE_ZSTD)
+    add_test(
+        NAME "unit.zstd_workers"
+        COMMAND test_zstd_workers
+            "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_workers_default.pcapng.zst"
+            "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_workers_lvl.pcapng.zst"
+            "${CMAKE_CURRENT_LIST_DIR}/results/test_zstd_workers_mt.pcapng.zst"
+    )
     # Only catches the bug when the library is built with -DNDEBUG (e.g.
     # the Release preset); in Debug builds the assert is live and the call runs.
     add_test(

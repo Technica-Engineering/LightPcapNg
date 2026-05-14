@@ -71,7 +71,7 @@ struct zstd_decompression_t
 	ZSTD_inBuffer input;
 };
 
-void* get_zstd_compression_context(FILE* file, int compression_level)
+void* get_zstd_compression_context(FILE* file, int compression_level, int num_workers)
 {
 	struct zstd_compression_t* context = calloc(1, sizeof(struct zstd_compression_t));
 	context->file = file;
@@ -92,6 +92,12 @@ void* get_zstd_compression_context(FILE* file, int compression_level)
 	size_t const set_level_result = ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_compressionLevel, compression_level);
 	assert(!ZSTD_isError(set_level_result));
 	(void)set_level_result;
+
+	// Tolerate setParameter failure (e.g. zstd built without multithreading)
+	// — the writer still works, just single-threaded.
+	if (num_workers > 0) {
+		(void)ZSTD_CCtx_setParameter(context->cctx, ZSTD_c_nbWorkers, num_workers);
+	}
 
 	return context;
 }
@@ -263,6 +269,7 @@ light_file light_io_zstd_open(const char* filename, const char* mode)
 {
 	// 0 level means default
 	int compression_level = 0;
+	int num_workers = 0;
 
 	// parse mode
 	bool read = false;
@@ -273,6 +280,17 @@ light_file light_io_zstd_open(const char* filename, const char* mode)
 			compression_level = *mode - '0';
 			//Input is scale 0-9 but zstd goes 1-22!
 			compression_level = (compression_level * 2) + 1;
+		}
+		else if (*mode == ',') {
+			// ",N" suffix -> ZSTD_c_nbWorkers. Multi-digit so callers can
+			// pass values larger than 9.
+			++mode;
+			num_workers = 0;
+			while (*mode >= '0' && *mode <= '9') {
+				num_workers = num_workers * 10 + (*mode - '0');
+				++mode;
+			}
+			continue;
 		}
 		else {
 			switch (*mode)
@@ -314,11 +332,11 @@ light_file light_io_zstd_open(const char* filename, const char* mode)
 		fd->fn_close = &light_zstd_close_r;
 	}
 	else {
-		fd->context = get_zstd_compression_context(file, compression_level);
+		fd->context = get_zstd_compression_context(file, compression_level, num_workers);
 		fd->fn_write = &light_zstd_write;
 		fd->fn_close = &light_zstd_close_w;
 	}
-	
+
 	return fd;
 }
 #endif // LIGHT_USE_ZSTD
