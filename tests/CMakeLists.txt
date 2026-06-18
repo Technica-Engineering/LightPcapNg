@@ -69,8 +69,8 @@ add_test(
 )
 
 add_test(
-    NAME "unit.write_tls_decryption_block"
-    COMMAND test_write_tls_decryption_block "${CMAKE_CURRENT_LIST_DIR}/results/test_write_decryption_block.pcapng"
+    NAME "unit.write_read_dsb"
+    COMMAND test_write_read_dsb "${CMAKE_CURRENT_LIST_DIR}/results/test_write_decryption_block.pcapng"
 )
 
 if(LIGHT_USE_ZSTD)

@@ -101,6 +101,18 @@ extern "C" {
 		struct light_option_t* next_option;
 	};
 
+	struct light_zigbee_aps {
+		uint8_t  key[16];
+		uint16_t pan_id;
+		uint16_t low_node_short_addr;
+		uint16_t high_node_short_addr;
+	};
+
+	struct light_zigbee_nwk {
+		uint8_t  key[16];
+		uint16_t pan_id;
+	};
+
 	typedef struct light_block_t* light_block;
 	typedef struct light_option_t* light_option;
 
@@ -110,6 +122,7 @@ extern "C" {
 	void fix_endianness_interface_description_block(struct _light_interface_description_block* idb, const bool swap_endianness);
 	void fix_endianness_enhanced_packet_block(struct _light_enhanced_packet_block* epb, const bool swap_endianness);
 	void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, const bool swap_endianness);
+	void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_block* dsb, const bool swap_endianness);
 
 	// block functions
 
