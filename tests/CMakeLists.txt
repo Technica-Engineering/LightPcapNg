@@ -73,6 +73,11 @@ add_test(
     COMMAND test_write_tls_decryption_block "${CMAKE_CURRENT_LIST_DIR}/results/test_write_decryption_block.pcapng"
 )
 
+add_test(
+    NAME "unit.options_remaining_size"
+    COMMAND test_options_remaining_size
+)
+
 if(LIGHT_USE_ZSTD)
     add_test(
         NAME "unit.zstd_workers"

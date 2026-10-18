@@ -122,7 +122,7 @@ static light_option __parse_options(const uint8_t** memory, const int32_t max_le
 		opt->data = calloc(1, actual_length);
 		memcpy(opt->data, *memory, actual_length);
 		*memory += actual_length;
-		remaining_size += actual_length;
+		remaining_size -= actual_length;
 	}
 
 	if (opt->code == 0) {
