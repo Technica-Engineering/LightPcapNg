@@ -75,7 +75,7 @@ add_test(
 
 add_test(
     NAME "unit.options_remaining_size"
-    COMMAND test_options_remaining_size "${CMAKE_CURRENT_LIST_DIR}/../pcaps/options_remaining_size.pcapng"
+    COMMAND test_options_remaining_size "${CMAKE_CURRENT_LIST_DIR}/../pcaps/corrupt/corrupt_options_remaining_size.pcapng"
 )
 
 if(LIGHT_USE_ZSTD)
