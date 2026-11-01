@@ -502,22 +502,23 @@ int light_write_decryption_block(light_pcapng pcapng, const light_packet_decrypt
 	}
 
 	const uint32_t secret_type = packet_decryption->secret_type;
-    const uint32_t key_len = packet_decryption->key_size;
+	const bool swap_endianness = pcapng->swap_endianness;
+    const uint32_t key_len = (swap_endianness)? bswap32(packet_decryption->key_size): packet_decryption->key_size;
 
     // Calculate Total Block Length
     // secrets_type(4) + secrets_len(4) + key
     uint32_t total_size = sizeof(struct _light_decryption_secrets_block) + key_len;
 	PADD32(total_size, &total_size);
 	struct _light_decryption_secrets_block* decryption_block = calloc(1, total_size);
-    if (decryption_block == NULL) {
-		return LIGHT_OUT_OF_MEMORY;
-	}
+	DCHECK_NULLP(decryption_block, return LIGHT_OUT_OF_MEMORY);
 
-	const bool swap_endianness = pcapng->swap_endianness;
-    decryption_block->secrets_type = (swap_endianness ? bswap32(secret_type) : secret_type); 	 // secrets_type
-    decryption_block->secrets_len = (swap_endianness ? bswap32(key_len) : key_len);              // secrets_len
+    decryption_block->secrets_type = secret_type; 	       // secrets_type
+    decryption_block->secrets_len =  key_len;              // secrets_len
 	// Copy the key string starting at offset 8
     memcpy(decryption_block->key_data, packet_decryption->key, key_len);
+
+	// fix endianness
+	fix_endianness_decryption_packet_block(decryption_block, swap_endianness);
 
 	light_block decryption_block_pcapng = light_create_block(LIGHT_DECRYPTION_SECRETS_BLOCK, (const uint32_t*)decryption_block, total_size + 3 * sizeof(uint32_t));
 	

@@ -111,6 +111,15 @@ static inline uint64_t bswap64(uint64_t x) {
 #  define hton32(x)     bswap32((x))
 #  define ntoh64(x)     bswap64((x))
 #  define hton64(x)     bswap64((x))
+#  ifndef le16toh
+#    define le16toh(x)    (x)
+#  endif
+#  ifndef le32toh
+#    define le32toh(x)    (x)
+#  endif
+#  ifndef le64toh
+#    define le64toh(x)    (x)
+#  endif
 #elif defined(__BIG_ENDIAN__)
 #  define ntoh16(x)     (x)
 #  define hton16(x)     (x)
@@ -118,6 +127,15 @@ static inline uint64_t bswap64(uint64_t x) {
 #  define hton32(x)     (x)
 #  define ntoh64(x)     (x)
 #  define hton64(x)     (x)
+#  ifndef le16toh
+#    define le16toh(x)    bswap16((x))
+#  endif
+#  ifndef le32toh
+#    define le32toh(x)    bswap32((x))
+#  endif
+#  ifndef le64toh
+#    define le64toh(x)    bswap64((x))
+#  endif
 #  else
 #    warning "UNKNOWN Platform / endianness; network / host byte swaps not defined."
 #endif

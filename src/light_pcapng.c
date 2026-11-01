@@ -24,6 +24,7 @@
 #include "light_debug.h"
 #include "light_util.h"
 #include "light_io.h"
+#include "light_dsb_secrets.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +71,29 @@ void fix_endianness_simple_packet_block(struct _light_simple_packet_block* spb, 
 {
 	if (swap_endianness) {
 		spb->original_packet_length = bswap32(spb->original_packet_length);
+	}
+}
+
+void fix_endianness_decryption_packet_block(struct _light_decryption_secrets_block* dsb, const bool swap_endianness) {
+	if (swap_endianness) {
+		dsb->secrets_type = bswap32(dsb->secrets_type);
+		dsb->secrets_len = bswap32(dsb->secrets_len);
+	}
+
+	// ZigBee payload fields are always little-endian per pcapng spec,
+	// regardless of the pcapng file byte order.
+	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZNWK && dsb->secrets_len >= 18) {
+		struct light_zigbee_nwk* zigbee_nwk = (struct light_zigbee_nwk*)(dsb->key_data);
+		// PAN ID is always LE per pcapng spec
+		zigbee_nwk->pan_id = le16toh(zigbee_nwk->pan_id);
+	}
+
+	if (dsb->secrets_type == LIGHT_DSB_SECRET_ZAPS && dsb->secrets_len >= 22) {
+		struct light_zigbee_aps* zigbee_aps = (struct light_zigbee_aps*)(dsb->key_data);
+
+		zigbee_aps->pan_id = le16toh(zigbee_aps->pan_id);
+		zigbee_aps->low_node_short_addr  = le16toh(zigbee_aps->low_node_short_addr);
+		zigbee_aps->high_node_short_addr  = le16toh(zigbee_aps->high_node_short_addr);
 	}
 }
 
@@ -153,6 +177,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 	case LIGHT_SECTION_HEADER_BLOCK:
 	{
 		struct _light_section_header* shb = calloc(1, sizeof(struct _light_section_header));
+		DCHECK_NULLP(shb, return);
 
 		shb->byteorder_magic = *(uint32_t*)local_data;
 		local_data += 4;
@@ -178,6 +203,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 	case LIGHT_INTERFACE_BLOCK:
 	{
 		struct _light_interface_description_block* idb = calloc(1, sizeof(struct _light_interface_description_block));
+		DCHECK_NULLP(idb, return);
 
 		idb->link_type = *(uint16_t*)local_data;
 		local_data += 2;
@@ -206,6 +232,7 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		PADD32(len, &actual_len);
 
 		epb = calloc(1, sizeof(struct _light_enhanced_packet_block) + actual_len);
+		DCHECK_NULLP(epb, return);
 
 		if (current->total_length < head_size) {
 			// Don't try to read anything, block is invalid
@@ -245,6 +272,8 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 		uint32_t actual_len = current->total_length - 2 * sizeof(current->total_length) - sizeof(current->type) - sizeof(original_packet_length);
 
 		spb = calloc(1, sizeof(struct _light_enhanced_packet_block) + actual_len);
+		DCHECK_NULLP(spb, return);
+
 		spb->original_packet_length = original_packet_length;
 		fix_endianness_simple_packet_block(spb, swap_endianness);
 
@@ -253,6 +282,40 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 
 		current->body = (uint8_t*)spb;
 		current->options = NULL; // No options defined by the standard for this block type.
+	}
+	break;
+
+	case LIGHT_DECRYPTION_SECRETS_BLOCK:
+	{
+		uint32_t secret_type = *(uint32_t*)local_data;
+		local_data += 4;
+		uint32_t secret_len = *(uint32_t*)local_data;
+		local_data += 4;
+
+		/*before allocating memory we should check endianness of secret_len
+		If reading a pcapng file with different endianness than our CPU 
+		( for example reading a big endian file on an x86 Little Endian machine), 
+		secret_len will be a massive, incorrect number before it is swapped.*/
+		if (swap_endianness) {
+            secret_len = bswap32(secret_len);
+        }
+		uint32_t len_data_with_padding = 0;
+		PADD32(secret_len, &len_data_with_padding);
+		struct _light_decryption_secrets_block* dsb = calloc(1, sizeof(struct _light_decryption_secrets_block) + len_data_with_padding);
+		DCHECK_NULLP(dsb, return);
+
+		// fix endianness
+		dsb->secrets_type = secret_type;
+		dsb->secrets_len = secret_len;
+		memcpy(dsb->key_data, local_data, secret_len);
+		fix_endianness_decryption_packet_block(dsb, swap_endianness);
+
+		local_data += len_data_with_padding;
+
+		current->body = (uint8_t*)dsb;
+		int32_t local_offset = (size_t)local_data - (size_t)original_start + (size_t)8;
+		light_option opt = __parse_options(&local_data, current->total_length - local_offset - sizeof(current->total_length), swap_endianness);
+		current->options = opt;
 	}
 	break;
 
