@@ -178,6 +178,13 @@ void parse_by_type(light_block current, const uint8_t* local_data, const bool sw
 	case LIGHT_INTERFACE_BLOCK:
 	{
 		struct _light_interface_description_block* idb = calloc(1, sizeof(struct _light_interface_description_block));
+		const uint32_t head_size = 20;
+
+		if (current->total_length < head_size) {
+			// Don't try to read anything, block is invalid
+			current->body = (uint8_t*)idb;
+			return;
+		}
 
 		idb->link_type = *(uint16_t*)local_data;
 		local_data += 2;

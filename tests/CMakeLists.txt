@@ -78,6 +78,11 @@ add_test(
     COMMAND test_options_remaining_size "${CMAKE_CURRENT_LIST_DIR}/../pcaps/corrupt/corrupt_options_remaining_size.pcapng"
 )
 
+add_test(
+    NAME "unit.idb_short_length"
+    COMMAND test_idb_short_length "${CMAKE_CURRENT_LIST_DIR}/../pcaps/corrupt/corrupt_idb_short_length.pcapng"
+)
+
 if(LIGHT_USE_ZSTD)
     add_test(
         NAME "unit.zstd_workers"
